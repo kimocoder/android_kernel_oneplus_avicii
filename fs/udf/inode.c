@@ -2163,18 +2163,22 @@ int8_t udf_current_aext(struct inode *inode, struct extent_position *epos,
 		ptr = iinfo->i_data + epos->offset -
 			udf_file_entry_alloc_offset(inode) +
 			iinfo->i_lenEAttr;
-		alen = udf_file_entry_alloc_offset(inode) +
-							iinfo->i_lenAlloc;
+		alen = udf_file_entry_alloc_offset(inode) + iinfo->i_lenAlloc;
 	} else {
 		struct allocExtDesc *header =
 			(struct allocExtDesc *)epos->bh->b_data;
+		size_t len, alen_local;
 
 		if (!epos->offset)
 			epos->offset = sizeof(struct allocExtDesc);
-		ptr = epos->bh->b_data + epos->offset;
-		if (check_add_overflow(sizeof(struct allocExtDesc),
-				le32_to_cpu(header->lengthAllocDescs), &alen))
+
+		len = le32_to_cpu(header->lengthAllocDescs);
+
+		if (check_add_overflow(sizeof(struct allocExtDesc), len, &alen_local))
 			return -1;
+
+		alen = alen_local;
+		ptr = epos->bh->b_data + epos->offset;
 	}
 
 	switch (iinfo->i_alloc_type) {
