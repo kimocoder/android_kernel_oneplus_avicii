@@ -142,3 +142,5 @@ Android.bp
 
 # Other
 out/
+*.orig
+*.rej
