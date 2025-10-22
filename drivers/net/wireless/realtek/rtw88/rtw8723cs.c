@@ -2,7 +2,7 @@
 /* Copyright Fiona Klute <fiona.klute@gmx.de> */
 
 #include <linux/mmc/sdio_func.h>
-#include "sdio_ids.h"
+#include <linux/mmc/sdio_ids.h>
 #include <linux/module.h>
 #include "main.h"
 #include "rtw8703b.h"
