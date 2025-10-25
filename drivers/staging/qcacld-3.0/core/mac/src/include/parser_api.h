@@ -29,7 +29,12 @@
 #ifndef __PARSE_H__
 #define __PARSE_H__
 
+#include <linux/version.h>
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(4, 20, 0))
+#include <linux/stdarg.h>
+#else
 #include <stdarg.h>
+#endif
 #include "sir_mac_prop_exts.h"
 #include "dot11f.h"
 #include "lim_ft_defs.h"

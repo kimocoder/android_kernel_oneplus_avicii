@@ -139,6 +139,10 @@
 #include "wlan_reg_ucfg_api.h"
 #include "wlan_dfs_ucfg_api.h"
 #include "wlan_hdd_rx_monitor.h"
+#ifdef FEATURE_FRAME_INJECTION_SUPPORT
+#include "wlan_hdd_frame_inject.h"
+#include "wlan_hdd_frame_inject_debug.h"
+#endif
 #include "sme_power_save_api.h"
 #include "enet.h"
 #include <cdp_txrx_cmn_struct.h>
@@ -5070,7 +5074,7 @@ hdd_alloc_station_adapter(struct hdd_context *hdd_ctx, tSirMacAddr mac_addr,
 	qdf_atomic_init(&adapter->cache_sta_count);
 
 	/* Init the net_device structure */
-	strlcpy(dev->name, name, IFNAMSIZ);
+	strscpy(dev->name, name, IFNAMSIZ);
 
 	qdf_mem_copy(dev->dev_addr, mac_addr, sizeof(tSirMacAddr));
 	qdf_mem_copy(adapter->mac_addr.bytes, mac_addr, sizeof(tSirMacAddr));
@@ -6593,6 +6597,14 @@ struct hdd_adapter *hdd_open_adapter(struct hdd_context *hdd_ctx, uint8_t sessio
 
 	hdd_periodic_sta_stats_init(adapter);
 
+#ifdef FEATURE_FRAME_INJECTION_SUPPORT
+	/* Initialize frame injection for all adapters */
+	if (QDF_STATUS_SUCCESS != hdd_init_frame_injection(adapter)) {
+		hdd_err("Failed to initialize frame injection for adapter");
+		/* Continue without frame injection support */
+	}
+#endif
+
 	return adapter;
 
 err_destroy_adapter_features_update_work:
@@ -6621,6 +6633,12 @@ static void __hdd_close_adapter(struct hdd_context *hdd_ctx,
 	qdf_event_destroy(&adapter->acs_complete_event);
 	qdf_event_destroy(&adapter->peer_cleanup_done);
 	hdd_adapter_feature_update_work_deinit(adapter);
+
+#ifdef FEATURE_FRAME_INJECTION_SUPPORT
+	/* Cleanup frame injection */
+	hdd_deinit_frame_injection(adapter);
+#endif
+
 	hdd_cleanup_adapter(hdd_ctx, adapter, rtnl_held);
 
 	if (hdd_ctx->current_intf_count != 0)
@@ -15577,6 +15595,15 @@ int hdd_init(void)
 	hdd_register_debug_callback();
 	wlan_roam_debug_init();
 
+#ifdef FEATURE_FRAME_INJECTION_SUPPORT
+	/* Initialize frame injection debug interfaces */
+	status = hdd_injection_init_debug_interfaces();
+	if (QDF_IS_STATUS_ERROR(status)) {
+		hdd_warn("Failed to initialize frame injection debug interfaces: %d", status);
+		/* Continue without debug interfaces - not critical */
+	}
+#endif
+
 	return 0;
 }
 
@@ -15590,6 +15617,11 @@ int hdd_init(void)
 void hdd_deinit(void)
 {
 	wlan_roam_debug_deinit();
+
+#ifdef FEATURE_FRAME_INJECTION_SUPPORT
+	/* Cleanup frame injection debug interfaces */
+	hdd_injection_deinit_debug_interfaces();
+#endif
 
 #ifdef WLAN_LOGGING_SOCK_SVC_ENABLE
 	wlan_logging_sock_deinit_svc();

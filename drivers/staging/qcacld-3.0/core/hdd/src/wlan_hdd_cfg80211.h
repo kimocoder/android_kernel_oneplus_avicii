@@ -101,9 +101,15 @@ struct hdd_context;
 #define WLAN_AKM_SUITE_DPP_RSN 0x506f9a02
 #endif
 
+#ifndef WLAN_AKM_SUITE_OWE
 #define WLAN_AKM_SUITE_OWE 0x000FAC12
+#endif
+#ifndef WLAN_AKM_SUITE_EAP_SHA256
 #define WLAN_AKM_SUITE_EAP_SHA256 0x000FAC0B
+#endif
+#ifndef WLAN_AKM_SUITE_EAP_SHA384
 #define WLAN_AKM_SUITE_EAP_SHA384 0x000FAC0C
+#endif
 
 
 #ifndef WLAN_AKM_SUITE_SAE
@@ -377,7 +383,7 @@ int wlan_hdd_send_avoid_freq_event(struct hdd_context *hdd_ctx,
  * Return: 0 on success or failure reason
  */
 int wlan_hdd_send_hang_reason_event(struct hdd_context *hdd_ctx,
-				    uint32_t reason, uint8_t *data,
+				    enum qdf_hang_reason reason, uint8_t *data,
 				    size_t data_len);
 
 int wlan_hdd_send_avoid_freq_for_dnbs(struct hdd_context *hdd_ctx,

@@ -150,6 +150,9 @@
 #include "wlan_hdd_thermal.h"
 #include <ol_defines.h>
 #include "wlan_hdd_cfr.h"
+#ifdef FEATURE_FRAME_INJECTION_SUPPORT
+#include "wlan_hdd_frame_inject.h"
+#endif
 #include <qdf_hang_event_notifier.h>
 #include "hif.h"
 #include "wlan_hdd_ioctl.h"
@@ -6204,7 +6207,7 @@ __wlan_hdd_cfg80211_get_wifi_info(struct wiphy *wiphy,
 
 	if (tb_vendor[QCA_WLAN_VENDOR_ATTR_WIFI_INFO_DRIVER_VERSION]) {
 		hdd_debug("Rcvd req for Driver version");
-		strlcpy(driver_version, QWLAN_VERSIONSTR,
+		strscpy(driver_version, QWLAN_VERSIONSTR,
 			sizeof(driver_version));
 		skb_len += strlen(driver_version) + 1;
 		count++;
@@ -15813,8 +15816,12 @@ const struct wiphy_vendor_command hdd_wiphy_vendor_commands[] = {
 	},
 #endif
 	FEATURE_SAR_LIMITS_VENDOR_COMMANDS
-	BCN_RECV_FEATURE_VENDOR_COMMANDS
-
+#ifdef FEATURE_FRAME_INJECTION_SUPPORT
+	FEATURE_FRAME_INJECTION_VENDOR_COMMANDS,
+#endif
+#ifdef WLAN_BCN_RECV_FEATURE
+	BCN_RECV_FEATURE_VENDOR_COMMANDS,
+#endif
 	{
 		.info.vendor_id = QCA_NL80211_VENDOR_ID,
 		.info.subcmd = QCA_NL80211_VENDOR_SUBCMD_SET_SAR_LIMITS,
@@ -17358,7 +17365,7 @@ static int __wlan_hdd_cfg80211_change_iface(struct wiphy *wiphy,
 				 * a randomized MAC address of the
 				 * form 02:1A:11:Fx:xx:xx
 				 */
-				get_random_bytes(&ndev->dev_addr[3], 3);
+				get_random_bytes((void *)&ndev->dev_addr[3], 3);
 				ndev->dev_addr[0] = 0x02;
 				ndev->dev_addr[1] = 0x1A;
 				ndev->dev_addr[2] = 0x11;
