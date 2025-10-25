@@ -1,0 +1,327 @@
+chipsets:
+  AX200:
+    antenna_config: 2x2
+    capabilities:
+    - dfs_support
+    - wpa3_support
+    - monitor_mode
+    - hardware_crypto
+    - power_management
+    - mesh_networking
+    family: iwlwifi
+    firmware_files:
+    - iwlwifi-cc-a0-50.ucode
+    firmware_required: true
+    frequency_bands:
+    - 2.4GHz
+    - 5GHz
+    interface_type: pcie
+    kernel_min_version: '4.19'
+    max_power_dbm: 20
+    name: AX200
+    notes: Popular in laptops and desktops
+    standards:
+    - 802.11ac
+    - 802.11ax
+    vendor: Intel
+  QCA6174:
+    antenna_config: 2x2
+    capabilities:
+    - dfs_support
+    - packet_injection
+    - monitor_mode
+    - hardware_crypto
+    - power_management
+    - mesh_networking
+    family: ath10k
+    firmware_files:
+    - ath10k/QCA6174/hw3.0/firmware.bin
+    firmware_required: true
+    frequency_bands:
+    - 2.4GHz
+    - 5GHz
+    interface_type: pcie
+    kernel_min_version: '3.10'
+    max_power_dbm: 20
+    name: QCA6174
+    notes: null
+    standards:
+    - 802.11ac
+    vendor: Qualcomm
+  QCA6390:
+    antenna_config: 2x2
+    capabilities:
+    - dfs_support
+    - packet_injection
+    - wpa3_support
+    - monitor_mode
+    - hardware_crypto
+    - power_management
+    - mesh_networking
+    family: ath11k
+    firmware_files:
+    - ath11k/QCA6390/hw2.0/amss.bin
+    - ath11k/QCA6390/hw2.0/m3.bin
+    firmware_required: true
+    frequency_bands:
+    - 2.4GHz
+    - 5GHz
+    interface_type: pcie
+    kernel_min_version: '4.19'
+    max_power_dbm: 20
+    name: QCA6390
+    notes: Common in laptops and mobile devices
+    standards:
+    - 802.11ac
+    - 802.11ax
+    vendor: Qualcomm
+  QCA6490:
+    antenna_config: 2x2
+    capabilities:
+    - dfs_support
+    - packet_injection
+    - wpa3_support
+    - monitor_mode
+    - hardware_crypto
+    - power_management
+    - mesh_networking
+    family: ath11k
+    firmware_files:
+    - ath11k/QCA6490/hw2.0/amss.bin
+    - ath11k/QCA6490/hw2.0/m3.bin
+    firmware_required: true
+    frequency_bands:
+    - 2.4GHz
+    - 5GHz
+    interface_type: pcie
+    kernel_min_version: '4.19'
+    max_power_dbm: 20
+    name: QCA6490
+    notes: Enhanced version of QCA6390
+    standards:
+    - 802.11ac
+    - 802.11ax
+    vendor: Qualcomm
+  QCA988X:
+    antenna_config: 3x3
+    capabilities:
+    - dfs_support
+    - packet_injection
+    - monitor_mode
+    - hardware_crypto
+    - power_management
+    - mesh_networking
+    family: ath10k
+    firmware_files:
+    - ath10k/QCA988X/hw2.0/firmware.bin
+    firmware_required: true
+    frequency_bands:
+    - 2.4GHz
+    - 5GHz
+    interface_type: pcie
+    kernel_min_version: '3.10'
+    max_power_dbm: 20
+    name: QCA988X
+    notes: null
+    standards:
+    - 802.11ac
+    vendor: Qualcomm
+  QCN9074:
+    antenna_config: 4x4
+    capabilities:
+    - dfs_support
+    - multi_antenna
+    - packet_injection
+    - wpa3_support
+    - monitor_mode
+    - hardware_crypto
+    - power_management
+    - mesh_networking
+    family: ath11k
+    firmware_files:
+    - ath11k/QCN9074/hw1.0/amss.bin
+    - ath11k/QCN9074/hw1.0/m3.bin
+    firmware_required: true
+    frequency_bands:
+    - 2.4GHz
+    - 5GHz
+    - 6GHz
+    interface_type: pcie
+    kernel_min_version: '4.19'
+    max_power_dbm: 30
+    name: QCN9074
+    notes: Enterprise and high-performance applications
+    standards:
+    - 802.11ac
+    - 802.11ax
+    vendor: Qualcomm
+  RT2800USB:
+    antenna_config: 1x1
+    capabilities:
+    - monitor_mode
+    - packet_injection
+    - power_management
+    family: rt2x00
+    firmware_files:
+    - rt2870.bin
+    firmware_required: true
+    frequency_bands:
+    - 2.4GHz
+    - 5GHz
+    interface_type: usb
+    kernel_min_version: '3.10'
+    max_power_dbm: 20
+    name: RT2800USB
+    notes: null
+    standards:
+    - 802.11n
+    vendor: Ralink
+  WCN6855:
+    antenna_config: 2x2
+    capabilities:
+    - dfs_support
+    - packet_injection
+    - wpa3_support
+    - monitor_mode
+    - hardware_crypto
+    - power_management
+    - mesh_networking
+    family: ath11k
+    firmware_files:
+    - ath11k/WCN6855/hw2.0/amss.bin
+    - ath11k/WCN6855/hw2.0/m3.bin
+    firmware_required: true
+    frequency_bands:
+    - 2.4GHz
+    - 5GHz
+    interface_type: pcie
+    kernel_min_version: '4.19'
+    max_power_dbm: 20
+    name: WCN6855
+    notes: Mobile and tablet optimized
+    standards:
+    - 802.11ac
+    - 802.11ax
+    vendor: Qualcomm
+drivers:
+  ath10k:
+    android_compatible: true
+    capabilities:
+    - dfs_support
+    - packet_injection
+    - monitor_mode
+    - hardware_crypto
+    - power_management
+    - mesh_networking
+    - spectral_scan
+    dependencies:
+    - mac80211
+    - cfg80211
+    - crypto
+    description: Qualcomm Atheros 11ac wireless driver
+    driver_family: ath
+    kconfig_options:
+    - BACKPORTS_ATH10K
+    - BACKPORTS_ATH10K_DEBUG
+    - BACKPORTS_ATH10K_DEBUGFS
+    kernel_max_version: null
+    kernel_min_version: '3.10'
+    module_names:
+    - ath10k_core
+    - ath10k_pci
+    name: ath10k
+    performance_notes: Mature 802.11ac implementation with good stability
+    security_notes: Supports WPA2 and basic WPA3 features
+    supported_chipsets:
+    - QCA988X
+    - QCA6174
+    vendor: Qualcomm
+  ath11k:
+    android_compatible: true
+    capabilities:
+    - dfs_support
+    - packet_injection
+    - wpa3_support
+    - monitor_mode
+    - hardware_crypto
+    - power_management
+    - mesh_networking
+    - spectral_scan
+    dependencies:
+    - mac80211
+    - cfg80211
+    - crypto
+    description: Qualcomm Atheros 11ac/11ax wireless driver
+    driver_family: ath
+    kconfig_options:
+    - BACKPORTS_ATH11K
+    - BACKPORTS_ATH11K_DEBUG
+    - BACKPORTS_ATH11K_DEBUGFS
+    kernel_max_version: null
+    kernel_min_version: '4.19'
+    module_names:
+    - ath11k
+    - ath11k_pci
+    name: ath11k
+    performance_notes: Optimized for 802.11ax features including OFDMA and MU-MIMO
+    security_notes: Supports WPA3, SAE, and OWE protocols
+    supported_chipsets:
+    - QCA6390
+    - QCA6490
+    - WCN6855
+    - QCN9074
+    vendor: Qualcomm
+  iwlwifi:
+    android_compatible: true
+    capabilities:
+    - dfs_support
+    - wpa3_support
+    - monitor_mode
+    - hardware_crypto
+    - power_management
+    - mesh_networking
+    dependencies:
+    - mac80211
+    - cfg80211
+    - crypto
+    description: Intel wireless driver
+    driver_family: iwlwifi
+    kconfig_options:
+    - BACKPORTS_IWLWIFI
+    - BACKPORTS_IWLWIFI_DEBUG
+    kernel_max_version: null
+    kernel_min_version: '4.19'
+    module_names:
+    - iwlwifi
+    - iwlmvm
+    name: iwlwifi
+    performance_notes: Optimized for Intel platforms with advanced power management
+    security_notes: Full WPA3 support with Intel optimizations
+    supported_chipsets:
+    - AX200
+    vendor: Intel
+  rt2x00:
+    android_compatible: true
+    capabilities:
+    - monitor_mode
+    - packet_injection
+    - power_management
+    dependencies:
+    - mac80211
+    - cfg80211
+    description: Ralink/MediaTek wireless driver
+    driver_family: rt2x00
+    kconfig_options:
+    - BACKPORTS_RT2X00
+    - BACKPORTS_RT2X00_DEBUG
+    kernel_max_version: null
+    kernel_min_version: '3.10'
+    module_names:
+    - rt2x00lib
+    - rt2800usb
+    name: rt2x00
+    performance_notes: Good for USB dongles and basic applications
+    security_notes: Basic WPA2 support
+    supported_chipsets:
+    - RT2800USB
+    vendor: Ralink

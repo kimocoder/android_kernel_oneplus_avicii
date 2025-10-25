@@ -1,0 +1,162 @@
+{
+  "wireless_drivers": {
+    "ath11k": {
+      "enabled": false,
+      "description": "Qualcomm Atheros 11ac/11ax wireless driver",
+      "chipsets": ["QCA6390", "QCA6490", "WCN6855", "QCN9074"],
+      "dependencies": ["cfg80211", "mac80211", "crypto"],
+      "firmware_required": true,
+      "build_flags": [
+        "-DCONFIG_ATH11K_DEBUG",
+        "-DCONFIG_ATH11K_TRACING"
+      ],
+      "source_dir": "drivers/net/wireless/ath/ath11k",
+      "firmware_files": [
+        "ath11k/QCA6390/hw2.0/amss.bin",
+        "ath11k/QCA6390/hw2.0/m3.bin",
+        "ath11k/QCA6490/hw2.0/amss.bin",
+        "ath11k/QCA6490/hw2.0/m3.bin",
+        "ath11k/WCN6855/hw2.0/amss.bin",
+        "ath11k/WCN6855/hw2.0/m3.bin"
+      ],
+      "supported_features": [
+        "monitor_mode",
+        "packet_injection",
+        "mesh_networking",
+        "802.11ax",
+        "spectral_scan"
+      ]
+    },
+    "ath10k": {
+      "enabled": false,
+      "description": "Qualcomm Atheros 11ac wireless driver",
+      "chipsets": ["QCA988X", "QCA6174", "QCA9377", "QCA4019"],
+      "dependencies": ["cfg80211", "mac80211", "crypto"],
+      "firmware_required": true,
+      "build_flags": [
+        "-DCONFIG_ATH10K_DEBUG",
+        "-DCONFIG_ATH10K_TRACING"
+      ],
+      "source_dir": "drivers/net/wireless/ath/ath10k",
+      "firmware_files": [
+        "ath10k/QCA988X/hw2.0/firmware-5.bin",
+        "ath10k/QCA988X/hw2.0/board.bin",
+        "ath10k/QCA6174/hw3.0/firmware-6.bin",
+        "ath10k/QCA6174/hw3.0/board.bin"
+      ],
+      "supported_features": [
+        "monitor_mode",
+        "packet_injection",
+        "mesh_networking",
+        "802.11ac",
+        "spectral_scan"
+      ]
+    },
+    "ath9k": {
+      "enabled": false,
+      "description": "Qualcomm Atheros 11n wireless driver",
+      "chipsets": ["AR9280", "AR9285", "AR9287", "AR9380"],
+      "dependencies": ["cfg80211", "mac80211"],
+      "firmware_required": false,
+      "build_flags": [
+        "-DCONFIG_ATH9K_DEBUG",
+        "-DCONFIG_ATH9K_DEBUGFS"
+      ],
+      "source_dir": "drivers/net/wireless/ath/ath9k",
+      "firmware_files": [],
+      "supported_features": [
+        "monitor_mode",
+        "packet_injection",
+        "mesh_networking",
+        "802.11n"
+      ]
+    },
+    "iwlwifi": {
+      "enabled": false,
+      "description": "Intel wireless driver",
+      "chipsets": ["AX200", "AX210", "9260", "8260", "7260"],
+      "dependencies": ["cfg80211", "mac80211"],
+      "firmware_required": true,
+      "build_flags": [
+        "-DCONFIG_IWLWIFI_DEBUG",
+        "-DCONFIG_IWLWIFI_DEVICE_TRACING"
+      ],
+      "source_dir": "drivers/net/wireless/intel/iwlwifi",
+      "firmware_files": [
+        "iwlwifi-cc-a0-63.ucode",
+        "iwlwifi-ty-a0-gf-a0-63.ucode",
+        "iwlwifi-9260-th-b0-jf-b0-46.ucode",
+        "iwlwifi-8265-36.ucode"
+      ],
+      "supported_features": [
+        "monitor_mode",
+        "802.11ax",
+        "power_management"
+      ]
+    },
+    "rt2x00": {
+      "enabled": false,
+      "description": "Ralink/MediaTek wireless driver",
+      "chipsets": ["RT3070", "RT2800", "RT5370", "RT3572"],
+      "dependencies": ["cfg80211", "mac80211"],
+      "firmware_required": true,
+      "build_flags": [
+        "-DCONFIG_RT2X00_DEBUG",
+        "-DCONFIG_RT2X00_DEBUGFS"
+      ],
+      "source_dir": "drivers/net/wireless/ralink/rt2x00",
+      "firmware_files": [
+        "rt2870.bin",
+        "rt3070.bin",
+        "rt2800usb.bin"
+      ],
+      "supported_features": [
+        "monitor_mode",
+        "packet_injection",
+        "mesh_networking",
+        "802.11n"
+      ]
+    }
+  },
+  "build_options": {
+    "parallel_jobs": 0,
+    "verbose": false,
+    "debug": false,
+    "optimization": "O2",
+    "warnings_as_errors": false,
+    "enable_tracing": true,
+    "enable_debugfs": true,
+    "strip_modules": false
+  },
+  "firmware_options": {
+    "auto_download": false,
+    "validate_checksums": true,
+    "install_optional": false,
+    "firmware_base_url": "https://git.kernel.org/pub/scm/linux/kernel/git/firmware/linux-firmware.git/plain/",
+    "backup_urls": [
+      "https://github.com/kvalo/ath11k-firmware/raw/master/",
+      "https://github.com/kvalo/ath10k-firmware/raw/master/"
+    ]
+  },
+  "security_options": {
+    "enable_monitor_mode": true,
+    "enable_packet_injection": true,
+    "regulatory_compliance": true,
+    "security_warnings": true,
+    "audit_logging": false
+  },
+  "android_options": {
+    "enable_android_compat": true,
+    "wakelock_integration": true,
+    "binder_integration": false,
+    "paranoid_networking": true,
+    "selinux_integration": true
+  },
+  "vendor_options": {
+    "qcom_compat": true,
+    "broadcom_compat": false,
+    "mediatek_compat": false,
+    "conflict_detection": true,
+    "runtime_switching": false
+  }
+}

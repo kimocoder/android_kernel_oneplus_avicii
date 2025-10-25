@@ -1,0 +1,1970 @@
+#
+# Linux Kernel Backports Configuration
+#
+# This file provides configuration options for integrating modern wireless
+# stack components (cfg80211/mac80211 from kernel 6.1) into kernel 4.19.
+#
+
+menuconfig BACKPORTS
+	bool "Enable Linux Kernel Backports"
+	depends on (!CFG80211 && !MAC80211) || EXPERT
+	help
+	  Enable modern wireless stack backported from newer kernels.
+	  This provides cfg80211/mac80211 from kernel 6.1 on kernel 4.19.
+
+	  Backports allow you to use newer wireless drivers and features
+	  on older kernel versions. This is particularly useful for:
+	  - Modern wireless security protocols
+	  - Enhanced monitor mode support
+	  - Frame injection capabilities
+	  - Better wireless debugging tools
+
+	  Say Y here to enable backports support.
+
+	  NOTE: Backports cannot be enabled simultaneously with the existing
+	  cfg80211 and mac80211 drivers unless EXPERT mode is enabled.
+	  In EXPERT mode, you can choose between backports and legacy drivers,
+	  but only one set should be enabled at a time.
+
+	  If unsure, say N.
+
+config BACKPORTS_VERSION
+	string
+	depends on BACKPORTS
+	default "6.1"
+	help
+	  Version of the kernel from which wireless components are backported.
+
+config BACKPORTS_CFG80211
+	tristate "cfg80211 - wireless configuration API"
+	depends on BACKPORTS
+	help
+	  cfg80211 is the Linux wireless LAN configuration API.
+	  It provides a unified interface for wireless device configuration
+	  and management.
+
+	  This backported version includes:
+	  - Modern regulatory domain support
+	  - Enhanced security features
+	  - Better power management
+	  - Improved roaming capabilities
+
+	  Say M to build cfg80211 as a module, Y to build it into the kernel,
+	  or N to disable it.
+
+config BACKPORTS_MAC80211
+	tristate "Generic IEEE 802.11 Networking Stack (mac80211)"
+	depends on BACKPORTS_CFG80211
+	help
+	  This option enables the hardware independent IEEE 802.11
+	  networking stack (mac80211).
+
+	  This backported version provides:
+	  - Modern 802.11 protocol support (802.11ac, 802.11ax features)
+	  - Enhanced aggregation and AMPDU support
+	  - Better power save mechanisms
+	  - Improved mesh networking
+	  - Advanced QoS features
+
+	  Say M to build mac80211 as a module, Y to build it into the kernel,
+	  or N to disable it.
+
+config BACKPORTS_MAC80211_RC_MINSTREL
+	bool "Minstrel rate control algorithm"
+	depends on BACKPORTS_MAC80211
+	default y
+	help
+	  This option enables the 'minstrel' TX rate control algorithm
+	  for devices that do not have rate control in hardware/firmware.
+
+config BACKPORTS_MAC80211_MESH
+	bool "Enable mac80211 mesh networking support"
+	depends on BACKPORTS_MAC80211
+	help
+	  Select this option to enable 802.11 mesh operation in mac80211
+	  drivers that support it. 802.11 mesh networks allow devices to
+	  communicate directly with each other without requiring a central
+	  access point.
+
+config BACKPORTS_MAC80211_LEDS
+	bool "Enable LED triggers"
+	depends on BACKPORTS_MAC80211 && LEDS_CLASS
+	help
+	  This option enables a few LED triggers for different
+	  packet receive/transmit events.
+
+config BACKPORTS_MAC80211_DEBUGFS
+	bool "Export mac80211 internals in DebugFS"
+	depends on BACKPORTS_MAC80211 && DEBUG_FS
+	help
+	  Select this to see extensive information about
+	  the internal state of mac80211 in debugfs.
+
+config BACKPORTS_MONITOR_MODE
+	bool "Enable monitor mode support"
+	depends on BACKPORTS_MAC80211 && PACKET
+	help
+	  Enable monitor mode for packet capture and injection.
+	  Monitor mode allows wireless interfaces to capture all
+	  packets on a wireless channel, regardless of destination.
+
+	  This is required for:
+	  - Wireless security testing and analysis
+	  - Network troubleshooting and debugging
+	  - Protocol analysis and research
+	  - Frame injection capabilities
+
+	  Monitor mode requires CONFIG_PACKET to be enabled for
+	  packet socket support.
+
+	  Say Y to enable monitor mode support.
+
+	  If unsure, say N.
+
+config BACKPORTS_MONITOR_RADIOTAP
+	bool "Enable radiotap header support in monitor mode"
+	depends on BACKPORTS_MONITOR_MODE
+	default y
+	help
+	  Enable radiotap header support for monitor mode interfaces.
+	  Radiotap headers provide detailed information about captured
+	  packets including signal strength, data rates, channel
+	  information, and other radio metadata.
+
+	  This is essential for:
+	  - Detailed wireless analysis
+	  - Signal strength monitoring
+	  - Channel utilization analysis
+	  - Advanced packet inspection
+
+	  Radiotap support is required by most wireless analysis tools
+	  including Wireshark, tcpdump, and aircrack-ng.
+
+	  Say Y to enable radiotap header support.
+
+config BACKPORTS_MONITOR_COOKED
+	bool "Enable cooked monitor mode support"
+	depends on BACKPORTS_MONITOR_MODE
+	help
+	  Enable cooked monitor mode which provides a simplified
+	  interface for packet capture without requiring raw 802.11
+	  frame handling.
+
+	  Cooked mode:
+	  - Simplifies packet capture for basic monitoring
+	  - Provides Ethernet-like headers for easier processing
+	  - Reduces complexity for simple monitoring applications
+	  - Compatible with standard packet capture libraries
+
+	  This is useful for applications that need basic packet
+	  monitoring without the complexity of raw 802.11 frames.
+
+	  Say Y to enable cooked monitor mode support.
+
+config BACKPORTS_MONITOR_CHANNEL_SWITCH
+	bool "Enable monitor mode channel switching"
+	depends on BACKPORTS_MONITOR_MODE
+	default y
+	help
+	  Enable dynamic channel switching for monitor mode interfaces.
+	  This allows monitor interfaces to change channels programmatically
+	  for channel scanning and multi-channel monitoring.
+
+	  Features include:
+	  - Runtime channel switching via nl80211
+	  - Support for channel scanning applications
+	  - Multi-channel monitoring capabilities
+	  - Integration with frequency hopping tools
+
+	  This is required for:
+	  - Wireless site surveys
+	  - Multi-channel packet capture
+	  - Spectrum analysis tools
+	  - Advanced wireless monitoring
+
+	  Say Y to enable monitor mode channel switching.
+
+config BACKPORTS_MONITOR_TX_STATUS
+	bool "Enable monitor mode TX status reporting"
+	depends on BACKPORTS_MONITOR_MODE
+	help
+	  Enable transmission status reporting for monitor mode
+	  frame injection. This provides feedback about whether
+	  injected frames were successfully transmitted.
+
+	  TX status reporting provides:
+	  - Confirmation of successful frame transmission
+	  - Retry count information
+	  - Acknowledgment status
+	  - Transmission timing information
+
+	  This is useful for:
+	  - Frame injection testing and validation
+	  - Wireless protocol testing
+	  - Performance analysis of injected frames
+	  - Debugging frame injection issues
+
+	  Say Y to enable TX status reporting for monitor mode.
+
+config BACKPORTS_MONITOR_ENHANCED
+	bool "Enable enhanced monitor mode capabilities"
+	depends on BACKPORTS_MONITOR_MODE
+	help
+	  Enable enhanced monitor mode capabilities including advanced
+	  packet filtering, multi-channel monitoring, and enhanced
+	  radiotap header support.
+
+	  Enhanced capabilities include:
+	  - Advanced packet filtering and classification
+	  - Multi-channel monitoring and scanning
+	  - Enhanced radiotap headers with timing information
+	  - Hardware timestamping support
+	  - Channel quality measurement
+	  - Interference detection and analysis
+
+	  This provides advanced monitoring capabilities for security
+	  analysis, network troubleshooting, and research applications.
+
+	  Say Y to enable enhanced monitor mode capabilities.
+
+config BACKPORTS_FRAME_INJECTION
+	bool "Enable frame injection support"
+	depends on BACKPORTS_MONITOR_MODE && PACKET_MMAP
+	help
+	  Enable raw 802.11 frame injection capabilities.
+	  This allows applications to transmit custom 802.11 frames
+	  directly through the wireless interface.
+
+	  *** SECURITY WARNING ***
+	  Frame injection can be used for wireless attacks and
+	  security testing. This feature should only be enabled
+	  in controlled environments with proper security measures.
+
+	  Frame injection requires CONFIG_PACKET_MMAP for efficient
+	  packet transmission and memory mapping support.
+
+	  Frame injection is used for:
+	  - Wireless penetration testing
+	  - Protocol compliance testing
+	  - Research and development
+	  - Network security auditing
+
+	  Only enable this if you understand the security implications
+	  and have implemented appropriate access controls.
+
+	  Say Y to enable frame injection support.
+
+	  If unsure, say N.
+
+config BACKPORTS_INJECTION_RATE_CONTROL
+	bool "Enable rate control for injected frames"
+	depends on BACKPORTS_FRAME_INJECTION
+	default y
+	help
+	  Enable rate control and retry logic for injected frames.
+	  This provides automatic rate adaptation and retry handling
+	  for frames transmitted via frame injection.
+
+	  Features include:
+	  - Automatic rate selection based on channel conditions
+	  - Retry logic for failed transmissions
+	  - Rate fallback on transmission failures
+	  - Integration with hardware rate control
+
+	  This improves the reliability of injected frames and
+	  provides better integration with the wireless stack.
+
+	  Say Y to enable rate control for injected frames.
+
+config BACKPORTS_INJECTION_SEQUENCE_CONTROL
+	bool "Enable sequence number control for injected frames"
+	depends on BACKPORTS_FRAME_INJECTION
+	help
+	  Enable automatic sequence number management for injected
+	  frames. This ensures proper sequence numbering for frames
+	  that require it and prevents sequence number conflicts.
+
+	  Features include:
+	  - Automatic sequence number assignment
+	  - Per-destination sequence tracking
+	  - Duplicate detection and prevention
+	  - Integration with existing sequence management
+
+	  This is important for:
+	  - Protocol compliance testing
+	  - Proper frame ordering
+	  - Avoiding sequence number conflicts
+	  - Integration with existing connections
+
+	  Say Y to enable sequence number control.
+
+config BACKPORTS_INJECTION_POWER_CONTROL
+	bool "Enable power control for injected frames"
+	depends on BACKPORTS_FRAME_INJECTION
+	help
+	  Enable transmission power control for injected frames.
+	  This allows fine-grained control over the transmission
+	  power of individual injected frames.
+
+	  Features include:
+	  - Per-frame power level control
+	  - Integration with regulatory power limits
+	  - Support for power ramping and testing
+	  - Compliance with local regulations
+
+	  This is useful for:
+	  - Range testing and validation
+	  - Power consumption optimization
+	  - Regulatory compliance testing
+	  - Signal strength analysis
+
+	  Say Y to enable power control for injected frames.
+
+config BACKPORTS_INJECTION_TIMING_CONTROL
+	bool "Enable precise timing control for injected frames"
+	depends on BACKPORTS_FRAME_INJECTION
+	help
+	  Enable precise timing control for frame injection.
+	  This provides microsecond-level timing control for
+	  transmitted frames and inter-frame spacing.
+
+	  Features include:
+	  - Precise transmission timing
+	  - Inter-frame gap control
+	  - Burst transmission support
+	  - Hardware timestamp integration
+
+	  This is essential for:
+	  - Protocol timing testing
+	  - Performance analysis
+	  - Interference testing
+	  - Real-time applications
+
+	  Say Y to enable precise timing control.
+
+config BACKPORTS_INJECTION_ENHANCED
+	bool "Enable enhanced frame injection capabilities"
+	depends on BACKPORTS_FRAME_INJECTION
+	help
+	  Enable enhanced frame injection capabilities including
+	  advanced rate control, adaptive retry mechanisms, and
+	  comprehensive injection statistics.
+
+	  Enhanced injection features:
+	  - Adaptive rate control with fallback
+	  - Intelligent retry mechanisms
+	  - Comprehensive injection statistics
+	  - Performance monitoring and assessment
+	  - Advanced radiotap header generation
+	  - Multi-antenna injection support
+
+	  This provides advanced injection capabilities for wireless
+	  testing, security research, and protocol development.
+
+	  Say Y to enable enhanced frame injection capabilities.
+
+config BACKPORTS_INJECTION_SECURITY_AUDIT
+	bool "Enable security auditing for frame injection"
+	depends on BACKPORTS_FRAME_INJECTION && AUDIT
+	help
+	  Enable comprehensive security auditing for frame injection
+	  operations. This logs all frame injection activities for
+	  security monitoring and compliance purposes.
+
+	  Audit features include:
+	  - Logging of all injected frames
+	  - Source process and user tracking
+	  - Frame content and destination logging
+	  - Integration with kernel audit subsystem
+
+	  This is important for:
+	  - Security monitoring and compliance
+	  - Forensic analysis
+	  - Access control validation
+	  - Regulatory compliance
+
+	  Requires CONFIG_AUDIT to be enabled.
+
+	  Say Y to enable security auditing for frame injection.
+
+config BACKPORTS_SECURITY_ENHANCED
+	bool "Enable enhanced wireless security features"
+	depends on BACKPORTS
+	help
+	  Enable enhanced wireless security features including threat
+	  detection, regulatory compliance monitoring, and security
+	  analysis capabilities.
+
+	  Enhanced security features include:
+	  - Real-time threat detection and analysis
+	  - Comprehensive regulatory compliance checking
+	  - Security event logging and reporting
+	  - Intrusion detection capabilities
+	  - Network security posture assessment
+	  - Automated security recommendations
+
+	  This provides comprehensive security monitoring and analysis
+	  capabilities for wireless networks and operations.
+
+	  Say Y to enable enhanced wireless security features.
+
+config BACKPORTS_REGULATORY_ENHANCED
+	bool "Enable enhanced regulatory compliance features"
+	depends on BACKPORTS_SECURITY_ENHANCED
+	help
+	  Enable enhanced regulatory compliance features including
+	  dynamic regulatory domain management, compliance validation,
+	  and regulatory violation detection.
+
+	  Enhanced regulatory features include:
+	  - Dynamic regulatory domain switching
+	  - Real-time compliance validation
+	  - Regulatory violation detection and reporting
+	  - DFS (Dynamic Frequency Selection) compliance
+	  - Power limit enforcement and monitoring
+	  - Channel restriction management
+
+	  This ensures comprehensive compliance with wireless
+	  regulations across different regions and domains.
+
+	  Say Y to enable enhanced regulatory compliance.
+
+config BACKPORTS_THREAT_DETECTION
+	bool "Enable wireless threat detection capabilities"
+	depends on BACKPORTS_SECURITY_ENHANCED
+	help
+	  Enable wireless threat detection capabilities including
+	  attack pattern recognition, anomaly detection, and
+	  security event correlation.
+
+	  Threat detection features include:
+	  - Deauthentication attack detection
+	  - Beacon flood attack detection
+	  - Probe request flood detection
+	  - Channel hopping attack detection
+	  - Rogue access point detection
+	  - Security anomaly analysis
+
+	  This provides real-time detection of wireless security
+	  threats and attacks for enhanced network protection.
+
+	  Say Y to enable wireless threat detection.
+
+config BACKPORTS_SECURITY_ANALYSIS
+	bool "Enable comprehensive security analysis"
+	depends on BACKPORTS_SECURITY_ENHANCED
+	help
+	  Enable comprehensive security analysis capabilities including
+	  network security assessment, vulnerability analysis, and
+	  security posture evaluation.
+
+	  Security analysis features include:
+	  - Network security posture assessment
+	  - Encryption usage analysis
+	  - Security protocol compliance checking
+	  - Vulnerability identification and reporting
+	  - Security trend analysis and reporting
+	  - Risk assessment and mitigation recommendations
+
+	  This provides detailed security analysis and assessment
+	  capabilities for wireless networks and infrastructure.
+
+	  Say Y to enable comprehensive security analysis.
+
+config BACKPORTS_DEBUG
+	bool "Enable backports debugging"
+	depends on BACKPORTS
+	help
+	  Enable debugging features for backports components.
+	  This adds additional logging and diagnostic capabilities
+	  to help troubleshoot backports-related issues.
+
+	  This option increases kernel size and may impact performance.
+	  Only enable for development and debugging purposes.
+
+config BACKPORTS_DEBUG_VERBOSE
+	bool "Enable verbose debugging output"
+	depends on BACKPORTS_DEBUG
+	help
+	  Enable verbose debugging output for backports components.
+	  This provides detailed logging of internal operations,
+	  function calls, and data structures.
+
+	  WARNING: This generates significant log output and can
+	  impact system performance. Only enable for detailed
+	  debugging and development work.
+
+	  Verbose debugging includes:
+	  - Function entry/exit logging
+	  - Parameter and return value logging
+	  - Internal state transitions
+	  - Detailed error reporting
+
+	  Say Y only if you need detailed debugging information.
+
+config BACKPORTS_DEBUG_CFG80211
+	bool "Enable cfg80211 debugging"
+	depends on BACKPORTS_DEBUG && BACKPORTS_CFG80211
+	help
+	  Enable debugging for cfg80211 wireless configuration API.
+	  This provides detailed logging of wireless configuration
+	  operations, regulatory domain handling, and interface
+	  management.
+
+	  Debug information includes:
+	  - Regulatory domain changes
+	  - Interface configuration
+	  - Scan operations
+	  - Authentication and association
+	  - Power management operations
+
+	  Say Y to enable cfg80211 debugging.
+
+config BACKPORTS_DEBUG_MAC80211
+	bool "Enable mac80211 debugging"
+	depends on BACKPORTS_DEBUG && BACKPORTS_MAC80211
+	help
+	  Enable debugging for mac80211 IEEE 802.11 stack.
+	  This provides detailed logging of frame processing,
+	  state machine operations, and protocol handling.
+
+	  Debug information includes:
+	  - Frame transmission and reception
+	  - State machine transitions
+	  - Rate control operations
+	  - Power save operations
+	  - Aggregation and AMPDU handling
+
+	  Say Y to enable mac80211 debugging.
+
+config BACKPORTS_DEBUG_MONITOR
+	bool "Enable monitor mode debugging"
+	depends on BACKPORTS_DEBUG && BACKPORTS_MONITOR_MODE
+	help
+	  Enable debugging for monitor mode operations.
+	  This provides detailed logging of packet capture,
+	  channel operations, and monitor interface management.
+
+	  Debug information includes:
+	  - Monitor interface creation and destruction
+	  - Channel switching operations
+	  - Packet capture and filtering
+	  - Radiotap header processing
+
+	  Say Y to enable monitor mode debugging.
+
+config BACKPORTS_DEBUG_INJECTION
+	bool "Enable frame injection debugging"
+	depends on BACKPORTS_DEBUG && BACKPORTS_FRAME_INJECTION
+	help
+	  Enable debugging for frame injection operations.
+	  This provides detailed logging of injected frames,
+	  transmission status, and injection parameters.
+
+	  Debug information includes:
+	  - Injected frame details
+	  - Transmission status and results
+	  - Rate control and retry information
+	  - Timing and power control
+
+	  Say Y to enable frame injection debugging.
+
+config BACKPORTS_TRACING
+	bool "Enable backports tracing support"
+	depends on BACKPORTS && TRACING
+	help
+	  Enable tracing support for backports components using
+	  the kernel's tracing infrastructure. This provides
+	  low-overhead tracing of backports operations.
+
+	  Tracing features include:
+	  - Function tracing with minimal overhead
+	  - Event tracing for key operations
+	  - Performance profiling support
+	  - Integration with ftrace and perf
+
+	  This is useful for:
+	  - Performance analysis
+	  - Debugging timing issues
+	  - Understanding code flow
+	  - Profiling backports operations
+
+	  Requires CONFIG_TRACING to be enabled.
+
+	  Say Y to enable backports tracing support.
+
+config BACKPORTS_STATISTICS
+	bool "Enable backports statistics collection"
+	depends on BACKPORTS
+	help
+	  Enable collection of detailed statistics for backports
+	  components. This provides runtime statistics about
+	  operations, performance, and resource usage.
+
+	  Statistics include:
+	  - Frame transmission and reception counts
+	  - Error rates and retry statistics
+	  - Performance metrics and timing
+	  - Resource usage information
+
+	  Statistics are available through:
+	  - /proc/net/backports/ interface
+	  - debugfs entries (if enabled)
+	  - sysfs attributes
+
+	  This is useful for:
+	  - Performance monitoring
+	  - Troubleshooting issues
+	  - System optimization
+	  - Usage analysis
+
+	  Say Y to enable statistics collection.
+
+config BACKPORTS_DIAGNOSTICS
+	bool "Enable backports diagnostic interfaces"
+	depends on BACKPORTS && DEBUG_FS
+	help
+	  Enable diagnostic interfaces for backports components
+	  through debugfs. This provides detailed runtime
+	  information and diagnostic capabilities.
+
+	  Diagnostic interfaces include:
+	  - Internal state inspection
+	  - Configuration parameter viewing
+	  - Runtime parameter adjustment
+	  - Diagnostic command execution
+
+	  Diagnostic information is available in:
+	  - /sys/kernel/debug/backports/
+
+	  This is useful for:
+	  - Runtime debugging
+	  - System state inspection
+	  - Configuration validation
+	  - Advanced troubleshooting
+
+	  Requires CONFIG_DEBUG_FS to be enabled.
+
+	  Say Y to enable diagnostic interfaces.
+
+config BACKPORTS_ANDROID
+	bool "Android-specific adaptations"
+	depends on BACKPORTS && ANDROID
+	default y
+	help
+	  Enable Android-specific adaptations for backports system.
+	  This includes compatibility with Android's security model,
+	  build system integration, and vendor driver coexistence.
+
+	  Android adaptations include:
+	  - Integration with Android kernel configuration
+	  - Compatibility with Android security policies
+	  - Vendor driver coexistence mechanisms
+	  - Android build system integration
+	  - SELinux policy compatibility
+
+	  This is required for proper backports operation on Android
+	  kernel 4.19 and ensures compatibility with Android's
+	  wireless framework and security model.
+
+	  Say Y to enable Android-specific adaptations.
+
+config BACKPORTS_ANDROID_WAKELOCK
+	bool "Enable Android wakelock integration"
+	depends on BACKPORTS_ANDROID && ANDROID_WAKELOCK
+	default y
+	help
+	  Enable integration with Android's wakelock system for
+	  power management. This ensures proper power management
+	  behavior when backports wireless components are active.
+
+	  Features include:
+	  - Automatic wakelock acquisition during wireless operations
+	  - Integration with Android power management framework
+	  - Proper suspend/resume handling for wireless interfaces
+	  - Battery optimization compatibility
+
+	  This is essential for proper power management on Android
+	  devices and prevents unexpected system suspends during
+	  wireless operations.
+
+	  Say Y to enable Android wakelock integration.
+
+config BACKPORTS_ANDROID_BINDER
+	bool "Enable Android Binder IPC integration"
+	depends on BACKPORTS_ANDROID && ANDROID_BINDER_IPC
+	help
+	  Enable integration with Android's Binder IPC system for
+	  communication with Android wireless services and framework
+	  components.
+
+	  Features include:
+	  - Binder interface for wireless configuration
+	  - Integration with Android WiFi service
+	  - Support for Android wireless framework callbacks
+	  - Compatibility with Android system services
+
+	  This enables seamless integration with Android's wireless
+	  framework and allows proper communication between kernel
+	  backports and Android userspace services.
+
+	  Say Y to enable Android Binder integration.
+
+config BACKPORTS_ANDROID_LOGGER
+	bool "Enable Android kernel logger integration"
+	depends on BACKPORTS_ANDROID && ANDROID_LOGGER
+	default y
+	help
+	  Enable integration with Android's kernel logger for
+	  backports debugging and diagnostic information.
+
+	  Features include:
+	  - Integration with Android logcat system
+	  - Proper log categorization and filtering
+	  - Android-compatible log formatting
+	  - Integration with Android debugging tools
+
+	  This ensures that backports debug information is properly
+	  integrated with Android's logging infrastructure and
+	  accessible through standard Android debugging tools.
+
+	  Say Y to enable Android logger integration.
+
+config BACKPORTS_ANDROID_PARANOID_NETWORK
+	bool "Enable Android paranoid networking integration"
+	depends on BACKPORTS_ANDROID && ANDROID_PARANOID_NETWORK
+	default y
+	help
+	  Enable integration with Android's paranoid networking
+	  security model. This ensures proper permission checking
+	  and access control for wireless operations.
+
+	  Features include:
+	  - Integration with Android permission system
+	  - Proper UID/GID-based access control
+	  - Compatibility with Android security policies
+	  - Network access permission enforcement
+
+	  This is essential for maintaining Android's security model
+	  and ensuring that wireless operations respect Android's
+	  permission and access control mechanisms.
+
+	  Say Y to enable paranoid networking integration.
+
+config BACKPORTS_ANDROID_LOW_MEMORY_KILLER
+	bool "Enable Android low memory killer integration"
+	depends on BACKPORTS_ANDROID && ANDROID_LOW_MEMORY_KILLER
+	help
+	  Enable integration with Android's low memory killer for
+	  proper memory management during wireless operations.
+
+	  Features include:
+	  - Memory pressure awareness
+	  - Proper cleanup during low memory conditions
+	  - Integration with Android memory management
+	  - OOM score adjustment for wireless processes
+
+	  This ensures that backports components behave properly
+	  under memory pressure and integrate correctly with
+	  Android's memory management policies.
+
+	  Say Y to enable low memory killer integration.
+
+config BACKPORTS_ANDROID_ASHMEM
+	bool "Enable Android shared memory (ashmem) support"
+	depends on BACKPORTS_ANDROID && ASHMEM
+	help
+	  Enable support for Android's shared memory (ashmem) system
+	  for efficient data sharing between kernel and userspace
+	  wireless components.
+
+	  Features include:
+	  - Efficient buffer sharing for wireless data
+	  - Integration with Android memory management
+	  - Reduced memory copying for wireless operations
+	  - Compatibility with Android framework expectations
+
+	  This improves performance and memory efficiency for
+	  wireless operations on Android systems.
+
+	  Say Y to enable ashmem support.
+
+config BACKPORTS_ANDROID_PROPERTY
+	bool "Enable Android system property integration"
+	depends on BACKPORTS_ANDROID
+	help
+	  Enable integration with Android's system property system
+	  for runtime configuration and status reporting.
+
+	  Features include:
+	  - Runtime configuration via system properties
+	  - Status reporting through property system
+	  - Integration with Android configuration framework
+	  - Compatibility with Android system services
+
+	  This allows dynamic configuration of backports components
+	  through Android's standard property system and enables
+	  integration with Android system services.
+
+	  Say Y to enable system property integration.
+
+config BACKPORTS_VENDOR_COMPAT
+	bool "Enable vendor driver compatibility layer"
+	depends on BACKPORTS
+	help
+	  Enable compatibility layer for coexistence with vendor-specific
+	  wireless drivers. This allows backports to work alongside or
+	  as an alternative to vendor drivers.
+
+	  The compatibility layer provides:
+	  - Runtime switching between backports and vendor drivers
+	  - Conflict detection and resolution
+	  - Shared resource management
+	  - Interface naming compatibility
+	  - Configuration migration support
+
+	  This is essential for devices with existing vendor wireless
+	  drivers that need to maintain compatibility while using
+	  backports for advanced features.
+
+	  Say Y to enable vendor driver compatibility.
+
+config BACKPORTS_VENDOR_QCOM
+	bool "Qualcomm vendor driver compatibility"
+	depends on BACKPORTS_VENDOR_COMPAT
+	help
+	  Enable specific compatibility features for Qualcomm wireless
+	  drivers including QCACLD, PRIMA, and WCNSS drivers.
+
+	  Qualcomm compatibility includes:
+	  - QCACLD driver coexistence
+	  - PRIMA WLAN driver compatibility
+	  - WCNSS core integration
+	  - Qualcomm-specific interface handling
+	  - QMI service compatibility
+
+	  This ensures proper operation on Qualcomm-based Android
+	  devices with existing vendor wireless drivers.
+
+	  Say Y if your device uses Qualcomm wireless drivers.
+
+config BACKPORTS_VENDOR_QCOM_QCACLD
+	bool "QCACLD driver compatibility"
+	depends on BACKPORTS_VENDOR_QCOM
+	help
+	  Enable specific compatibility with Qualcomm's QCACLD
+	  (Qualcomm Connectivity Abstraction Layer Driver) wireless
+	  driver.
+
+	  QCACLD compatibility features:
+	  - Mutual exclusion with QCACLD driver
+	  - Shared firmware interface compatibility
+	  - Configuration parameter migration
+	  - Interface naming consistency
+	  - Runtime driver switching support
+
+	  This prevents conflicts when both backports and QCACLD
+	  are present in the kernel configuration.
+
+	  Say Y if your device uses QCACLD driver.
+
+config BACKPORTS_VENDOR_QCOM_PRIMA
+	bool "PRIMA WLAN driver compatibility"
+	depends on BACKPORTS_VENDOR_QCOM
+	help
+	  Enable specific compatibility with Qualcomm's PRIMA WLAN
+	  driver for older Qualcomm platforms.
+
+	  PRIMA compatibility features:
+	  - Mutual exclusion with PRIMA driver
+	  - Legacy interface compatibility
+	  - Configuration migration support
+	  - Firmware loading compatibility
+	  - Platform-specific adaptations
+
+	  This ensures proper operation on devices using the
+	  legacy PRIMA WLAN driver.
+
+	  Say Y if your device uses PRIMA WLAN driver.
+
+config BACKPORTS_VENDOR_QCOM_WCNSS
+	bool "WCNSS core compatibility"
+	depends on BACKPORTS_VENDOR_QCOM
+	help
+	  Enable compatibility with Qualcomm's WCNSS (Wireless
+	  Connectivity Network Sub System) core driver.
+
+	  WCNSS compatibility features:
+	  - WCNSS core service integration
+	  - Shared resource management
+	  - Power management coordination
+	  - Firmware loading coordination
+	  - Platform resource sharing
+
+	  This ensures proper integration with Qualcomm's wireless
+	  subsystem infrastructure.
+
+	  Say Y if your device uses WCNSS core.
+
+config BACKPORTS_VENDOR_BROADCOM
+	bool "Broadcom vendor driver compatibility"
+	depends on BACKPORTS_VENDOR_COMPAT
+	help
+	  Enable specific compatibility features for Broadcom wireless
+	  drivers including BCM and DHD drivers.
+
+	  Broadcom compatibility includes:
+	  - BCM driver coexistence
+	  - DHD (Dongle Host Driver) compatibility
+	  - Broadcom-specific interface handling
+	  - Firmware loading compatibility
+	  - Platform-specific adaptations
+
+	  This ensures proper operation on Broadcom-based devices
+	  with existing vendor wireless drivers.
+
+	  Say Y if your device uses Broadcom wireless drivers.
+
+config BACKPORTS_VENDOR_MEDIATEK
+	bool "MediaTek vendor driver compatibility"
+	depends on BACKPORTS_VENDOR_COMPAT
+	help
+	  Enable specific compatibility features for MediaTek wireless
+	  drivers and platform-specific adaptations.
+
+	  MediaTek compatibility includes:
+	  - MediaTek driver coexistence
+	  - Platform-specific interface handling
+	  - MediaTek firmware compatibility
+	  - Power management integration
+	  - Platform resource coordination
+
+	  This ensures proper operation on MediaTek-based devices
+	  with existing vendor wireless drivers.
+
+	  Say Y if your device uses MediaTek wireless drivers.
+
+config BACKPORTS_VENDOR_RUNTIME_SWITCH
+	bool "Enable runtime vendor driver switching"
+	depends on BACKPORTS_VENDOR_COMPAT
+	help
+	  Enable runtime switching between backports and vendor
+	  wireless drivers without requiring kernel recompilation.
+
+	  Runtime switching features:
+	  - Dynamic driver loading/unloading
+	  - Configuration preservation during switches
+	  - Interface state management
+	  - Seamless transition support
+	  - User-space control interface
+
+	  This allows users to switch between backports and vendor
+	  drivers at runtime for testing and comparison purposes.
+
+	  WARNING: Runtime switching may cause temporary network
+	  disruption and should be used carefully.
+
+	  Say Y to enable runtime driver switching.
+
+config BACKPORTS_VENDOR_CONFLICT_DETECTION
+	bool "Enable automatic vendor driver conflict detection"
+	depends on BACKPORTS_VENDOR_COMPAT
+	default y
+	help
+	  Enable automatic detection and resolution of conflicts
+	  between backports and vendor wireless drivers.
+
+	  Conflict detection features:
+	  - Automatic driver conflict detection
+	  - Resource conflict resolution
+	  - Configuration conflict warnings
+	  - Automatic mutual exclusion
+	  - User notification of conflicts
+
+	  This prevents system instability caused by conflicting
+	  wireless drivers and provides clear guidance for
+	  resolution.
+
+	  Say Y to enable conflict detection.
+
+config BACKPORTS_VENDOR_MIGRATION
+	bool "Enable vendor driver configuration migration"
+	depends on BACKPORTS_VENDOR_COMPAT
+	help
+	  Enable automatic migration of configuration settings
+	  from vendor drivers to backports when switching.
+
+	  Migration features:
+	  - Automatic configuration detection
+	  - Parameter mapping and translation
+	  - Settings preservation during migration
+	  - Compatibility validation
+	  - Migration status reporting
+
+	  This simplifies the transition from vendor drivers to
+	  backports by preserving existing configuration settings.
+
+	  Say Y to enable configuration migration.
+
+config BACKPORTS_SECURITY_ANDROID
+	bool "Enable Android security model integration"
+	depends on BACKPORTS_ANDROID
+	default y
+	help
+	  Enable integration with Android's security model including
+	  SELinux policies, permission system, and security frameworks.
+
+	  Android security integration includes:
+	  - SELinux policy compatibility
+	  - Android permission system integration
+	  - Security context management
+	  - Capability-based access control
+	  - Android security framework compatibility
+
+	  This ensures that backports components operate within
+	  Android's security model and respect Android's security
+	  policies and access controls.
+
+	  Say Y to enable Android security integration.
+
+config BACKPORTS_SELINUX_ANDROID
+	bool "Enable Android SELinux policy integration"
+	depends on BACKPORTS_SECURITY_ANDROID && SECURITY_SELINUX
+	default y
+	help
+	  Enable integration with Android's SELinux security policies
+	  for backports wireless components.
+
+	  SELinux integration features:
+	  - Android SELinux policy compatibility
+	  - Proper security context assignment
+	  - Domain transition support
+	  - File context management
+	  - Process security labeling
+
+	  This ensures that backports components have proper SELinux
+	  contexts and operate within Android's SELinux policy
+	  framework.
+
+	  Requires CONFIG_SECURITY_SELINUX to be enabled.
+
+	  Say Y to enable SELinux integration.
+
+config BACKPORTS_ANDROID_PERMISSIONS
+	bool "Enable Android permission system integration"
+	depends on BACKPORTS_SECURITY_ANDROID
+	default y
+	help
+	  Enable integration with Android's runtime permission system
+	  for wireless operations and capabilities.
+
+	  Permission system integration includes:
+	  - Runtime permission checking
+	  - Android permission model compliance
+	  - UID/GID-based access control
+	  - Permission group management
+	  - Capability enforcement
+
+	  This ensures that wireless operations respect Android's
+	  permission model and require appropriate permissions
+	  for sensitive operations.
+
+	  Say Y to enable permission system integration.
+
+config BACKPORTS_ANDROID_KEYSTORE
+	bool "Enable Android Keystore integration"
+	depends on BACKPORTS_SECURITY_ANDROID && ANDROID_KEYSTORE
+	help
+	  Enable integration with Android's Keystore system for
+	  secure key management in wireless operations.
+
+	  Keystore integration features:
+	  - Secure key storage for wireless credentials
+	  - Hardware-backed key storage support
+	  - Key attestation and validation
+	  - Secure key derivation
+	  - Integration with Android crypto framework
+
+	  This provides secure key management for wireless security
+	  protocols and ensures proper integration with Android's
+	  security infrastructure.
+
+	  Say Y to enable Keystore integration.
+
+config BACKPORTS_ANDROID_VERIFIED_BOOT
+	bool "Enable Android Verified Boot integration"
+	depends on BACKPORTS_SECURITY_ANDROID && ANDROID_VERIFIED_BOOT
+	help
+	  Enable integration with Android's Verified Boot system
+	  for secure boot validation of backports components.
+
+	  Verified Boot integration includes:
+	  - Boot-time integrity verification
+	  - Secure boot chain validation
+	  - Tamper detection and reporting
+	  - Rollback protection
+	  - Integration with device security state
+
+	  This ensures that backports components are verified as
+	  part of Android's secure boot process and maintain
+	  system integrity.
+
+	  Say Y to enable Verified Boot integration.
+
+config BACKPORTS_ANDROID_SECURITY_PATCH
+	bool "Enable Android security patch level integration"
+	depends on BACKPORTS_SECURITY_ANDROID
+	help
+	  Enable integration with Android's security patch level
+	  system for tracking and enforcing security updates.
+
+	  Security patch integration includes:
+	  - Security patch level tracking
+	  - Vulnerability status reporting
+	  - Update enforcement policies
+	  - Security bulletin compliance
+	  - Patch level validation
+
+	  This ensures that backports components are properly
+	  tracked for security updates and comply with Android's
+	  security patch level requirements.
+
+	  Say Y to enable security patch integration.
+
+config BACKPORTS_ANDROID_DEVICE_ADMIN
+	bool "Enable Android Device Administration integration"
+	depends on BACKPORTS_SECURITY_ANDROID
+	help
+	  Enable integration with Android's Device Administration
+	  framework for enterprise security policies.
+
+	  Device Administration integration includes:
+	  - Enterprise policy enforcement
+	  - Device management compliance
+	  - Security policy application
+	  - Administrative control support
+	  - Enterprise mobility management
+
+	  This ensures that backports components respect enterprise
+	  security policies and integrate with Android's device
+	  management framework.
+
+	  Say Y to enable Device Administration integration.
+
+config BACKPORTS_ANDROID_WORK_PROFILE
+	bool "Enable Android Work Profile security integration"
+	depends on BACKPORTS_SECURITY_ANDROID
+	help
+	  Enable integration with Android's Work Profile security
+	  model for enterprise and personal data separation.
+
+	  Work Profile integration includes:
+	  - Profile-based access control
+	  - Data separation enforcement
+	  - Cross-profile communication control
+	  - Enterprise policy application
+	  - Personal/work context management
+
+	  This ensures proper data separation and security policy
+	  enforcement in Android Work Profile environments.
+
+	  Say Y to enable Work Profile integration.
+
+config BACKPORTS_ANDROID_SECURITY_AUDIT
+	bool "Enable Android security auditing integration"
+	depends on BACKPORTS_SECURITY_ANDROID && AUDIT
+	help
+	  Enable integration with Android's security auditing
+	  framework for comprehensive security event logging.
+
+	  Security auditing features:
+	  - Android-compatible audit logging
+	  - Security event categorization
+	  - Compliance reporting
+	  - Security incident tracking
+	  - Integration with Android security tools
+
+	  This provides comprehensive security auditing for backports
+	  operations and ensures compliance with Android security
+	  monitoring requirements.
+
+	  Requires CONFIG_AUDIT to be enabled.
+
+	  Say Y to enable security auditing integration.
+
+#
+# Wireless Drivers Configuration
+#
+# This section provides configuration options for modern wireless drivers
+# that are backported from newer kernels, including ath11k, ath10k, iwlwifi,
+# and other wireless driver families.
+#
+
+menuconfig BACKPORTS_WIRELESS_DRIVERS
+	bool "Enable Wireless Drivers Support"
+	depends on BACKPORTS && BACKPORTS_MAC80211 && BACKPORTS_CFG80211
+	help
+	  Enable support for modern wireless drivers backported from newer kernels.
+	  This includes comprehensive support for Qualcomm Atheros, Intel, Ralink,
+	  and other wireless chipset families.
+
+	  Supported driver families:
+	  - ath11k: Qualcomm Atheros 11ac/11ax (QCA6390, QCA6490, WCN6855, QCN9074)
+	  - ath10k: Qualcomm Atheros 11ac (QCA988X, QCA6174, QCA9377, QCA4019)
+	  - ath9k: Qualcomm Atheros legacy (AR9280, AR9285, AR9287, AR9380)
+	  - iwlwifi: Intel wireless (7260, 8260, 9260, AX200, AX210)
+	  - rt2x00: Ralink/MediaTek (RT2500, RT2800, RT3070, RT5370)
+
+	  Features include:
+	  - Monitor mode and packet injection
+	  - Mesh networking support
+	  - Advanced security features
+	  - Firmware management
+	  - Power management optimization
+	  - Regulatory compliance
+
+	  Say Y to enable wireless drivers support.
+
+#
+# Wireless Stack Configuration
+# (All options depend on BACKPORTS_WIRELESS_DRIVERS)
+#
+
+config BACKPORTS_WIRELESS_REGULATORY
+	bool "Enhanced regulatory domain support"
+	depends on BACKPORTS_WIRELESS_DRIVERS && BACKPORTS_CFG80211
+	default y
+	help
+	  Enable enhanced regulatory domain support for wireless drivers.
+	  This provides comprehensive regulatory compliance features including
+	  dynamic regulatory domain updates, country code management, and
+	  power limit enforcement.
+
+	  Features include:
+	  - Dynamic regulatory domain switching
+	  - Country code detection and enforcement
+	  - Power limit and channel restriction management
+	  - Regulatory database integration
+	  - DFS (Dynamic Frequency Selection) support
+	  - Compliance with regional regulations
+
+	  This is required for proper wireless operation in different
+	  countries and regions.
+
+	  Say Y to enable enhanced regulatory support.
+
+config BACKPORTS_WIRELESS_CRYPTO
+	bool "Enhanced wireless cryptography support"
+	depends on BACKPORTS_WIRELESS_DRIVERS && BACKPORTS_MAC80211
+	select CRYPTO_AES
+	select CRYPTO_ARC4
+	select CRYPTO_ECB
+	select CRYPTO_CMAC
+	select CRYPTO_CCMP
+	select CRYPTO_GCMP
+	default y
+	help
+	  Enable enhanced cryptography support for modern wireless security
+	  protocols. This includes support for WPA3, SAE, OWE, and other
+	  advanced security features.
+
+	  Supported security protocols:
+	  - WPA3 Personal and Enterprise
+	  - SAE (Simultaneous Authentication of Equals)
+	  - OWE (Opportunistic Wireless Encryption)
+	  - Enhanced Open
+	  - 802.11w Management Frame Protection
+	  - GCMP-256 and CCMP-256 encryption
+
+	  This automatically selects required crypto modules for
+	  wireless security operations.
+
+	  Say Y to enable enhanced wireless cryptography.
+
+config BACKPORTS_WIRELESS_MESH
+	bool "Enhanced mesh networking support"
+	depends on BACKPORTS_WIRELESS_DRIVERS && BACKPORTS_MAC80211_MESH
+	default y
+	help
+	  Enable enhanced mesh networking support with advanced features
+	  for 802.11s mesh networks and proprietary mesh protocols.
+
+	  Enhanced mesh features:
+	  - 802.11s mesh networking with path selection
+	  - Mesh security with SAE authentication
+	  - Multi-hop mesh routing optimization
+	  - Mesh power save mechanisms
+	  - Mesh peering and authentication
+	  - Airtime-based path selection
+
+	  This extends the basic mesh support with advanced features
+	  required for production mesh deployments.
+
+	  Say Y to enable enhanced mesh networking.
+
+#
+# Qualcomm Atheros Driver Family
+#
+
+menuconfig BACKPORTS_ATH_DRIVERS
+	bool "Qualcomm Atheros wireless drivers"
+	depends on BACKPORTS_WIRELESS_DRIVERS
+	help
+	  Enable support for Qualcomm Atheros wireless drivers including
+	  ath11k, ath10k, and ath9k driver families.
+
+	  Qualcomm Atheros drivers support a wide range of wireless chipsets
+	  from legacy 802.11n to modern 802.11ax (Wi-Fi 6) devices.
+
+	  Say Y to enable Qualcomm Atheros driver support.
+
+# ATH drivers configuration (depends on BACKPORTS_ATH_DRIVERS)
+
+config BACKPORTS_ATH11K
+	tristate "Qualcomm Atheros 11ac/11ax wireless support (ath11k)"
+	depends on BACKPORTS_ATH_DRIVERS && BACKPORTS_MAC80211 && HAS_DMA
+	select BACKPORTS_WIRELESS_CRYPTO
+	select BACKPORTS_WIRELESS_REGULATORY
+	help
+	  This module adds support for Qualcomm Atheros 11ac/11ax wireless
+	  chipsets including QCA6390, QCA6490, WCN6855, and QCN9074.
+
+	  ath11k supports:
+	  - 802.11ac Wave 2 and 802.11ax (Wi-Fi 6) features
+	  - Multi-user MIMO (MU-MIMO) and OFDMA
+	  - Advanced power management
+	  - Monitor mode and packet injection
+	  - Mesh networking
+	  - WPA3 and enhanced security features
+
+	  Supported chipsets:
+	  - QCA6390: PCIe 802.11ax 2x2 with Bluetooth
+	  - QCA6490: PCIe 802.11ax 2x2 with Bluetooth
+	  - WCN6855: PCIe 802.11ax 2x2 with Bluetooth
+	  - QCN9074: PCIe 802.11ax 4x4 enterprise
+
+	  Say M to build ath11k as a module, Y to build into kernel.
+
+config BACKPORTS_ATH11K_DEBUG
+	bool "Enable ath11k debugging"
+	depends on BACKPORTS_ATH11K && BACKPORTS_DEBUG
+	help
+	  Enable debugging support for ath11k driver including detailed
+	  logging, debugfs interfaces, and diagnostic capabilities.
+
+	  Say Y to enable ath11k debugging.
+
+config BACKPORTS_ATH11K_DEBUGFS
+	bool "Enable ath11k debugfs support"
+	depends on BACKPORTS_ATH11K && DEBUG_FS
+	help
+	  Enable debugfs support for ath11k driver providing runtime
+	  statistics, configuration inspection, and diagnostic interfaces.
+
+	  Say Y to enable ath11k debugfs support.
+
+config BACKPORTS_ATH11K_SPECTRAL
+	bool "Enable ath11k spectral scan support"
+	depends on BACKPORTS_ATH11K
+	help
+	  Enable spectral scan support for ath11k driver allowing
+	  spectrum analysis and interference detection capabilities.
+
+	  Say Y to enable spectral scan support.
+
+config BACKPORTS_ATH11K_TRACING
+	bool "Enable ath11k tracing support"
+	depends on BACKPORTS_ATH11K && BACKPORTS_TRACING
+	help
+	  Enable tracing support for ath11k driver using kernel's
+	  tracing infrastructure for performance analysis.
+
+	  Say Y to enable ath11k tracing support.
+
+menuconfig BACKPORTS_ATH11K_CHIPSETS
+	bool "ath11k chipset-specific configurations"
+	depends on BACKPORTS_ATH11K
+	help
+	  Enable chipset-specific configuration options for ath11k driver.
+	  This allows fine-tuning of driver behavior for specific chipsets.
+
+# ATH11K chipset configurations (depends on BACKPORTS_ATH11K_CHIPSETS)
+
+config BACKPORTS_ATH11K_QCA6390
+	bool "QCA6390 chipset support"
+	depends on BACKPORTS_ATH11K_CHIPSETS && BACKPORTS_ATH11K
+	default y
+	help
+	  Enable support for QCA6390 chipset (PCIe 802.11ax 2x2).
+	  This is commonly found in laptops and mobile devices.
+
+config BACKPORTS_ATH11K_QCA6490
+	bool "QCA6490 chipset support"
+	depends on BACKPORTS_ATH11K_CHIPSETS && BACKPORTS_ATH11K
+	default y
+	help
+	  Enable support for QCA6490 chipset (PCIe 802.11ax 2x2).
+	  This is an enhanced version of QCA6390 with improved performance.
+
+config BACKPORTS_ATH11K_WCN6855
+	bool "WCN6855 chipset support"
+	depends on BACKPORTS_ATH11K_CHIPSETS && BACKPORTS_ATH11K
+	default y
+	help
+	  Enable support for WCN6855 chipset (PCIe 802.11ax 2x2).
+	  This is commonly found in mobile devices and tablets.
+
+config BACKPORTS_ATH11K_QCN9074
+	bool "QCN9074 chipset support"
+	depends on BACKPORTS_ATH11K_CHIPSETS && BACKPORTS_ATH11K
+	default y
+	help
+	  Enable support for QCN9074 chipset (PCIe 802.11ax 4x4).
+	  This is designed for enterprise and high-performance applications.
+
+# End of ATH11K chipset configurations
+
+config BACKPORTS_ATH10K
+	tristate "Qualcomm Atheros 11ac wireless support (ath10k)"
+	depends on BACKPORTS_ATH_DRIVERS && BACKPORTS_MAC80211 && HAS_DMA
+	select BACKPORTS_WIRELESS_CRYPTO
+	select BACKPORTS_WIRELESS_REGULATORY
+	help
+	  This module adds support for Qualcomm Atheros 11ac wireless
+	  chipsets including QCA988X, QCA6174, QCA9377, and QCA4019.
+
+	  ath10k supports:
+	  - 802.11ac Wave 1 and Wave 2 features
+	  - Multi-user MIMO (MU-MIMO)
+	  - Advanced power management
+	  - Monitor mode and packet injection
+	  - Mesh networking
+	  - WPA2/WPA3 security features
+
+	  Supported chipsets:
+	  - QCA988X: PCIe 802.11ac 3x3
+	  - QCA6174: PCIe/SDIO 802.11ac 2x2
+	  - QCA9377: PCIe/SDIO 802.11ac 1x1
+	  - QCA4019: Integrated 802.11ac 2x2
+
+	  Say M to build ath10k as a module, Y to build into kernel.
+
+config BACKPORTS_ATH10K_DEBUG
+	bool "Enable ath10k debugging"
+	depends on BACKPORTS_ATH10K && BACKPORTS_DEBUG
+	help
+	  Enable debugging support for ath10k driver.
+
+config BACKPORTS_ATH10K_DEBUGFS
+	bool "Enable ath10k debugfs support"
+	depends on BACKPORTS_ATH10K && DEBUG_FS
+	help
+	  Enable debugfs support for ath10k driver.
+
+config BACKPORTS_ATH10K_SPECTRAL
+	bool "Enable ath10k spectral scan support"
+	depends on BACKPORTS_ATH10K
+	help
+	  Enable spectral scan support for ath10k driver.
+
+config BACKPORTS_ATH10K_TRACING
+	bool "Enable ath10k tracing support"
+	depends on BACKPORTS_ATH10K && BACKPORTS_TRACING
+	help
+	  Enable tracing support for ath10k driver.
+
+config BACKPORTS_ATH9K
+	tristate "Qualcomm Atheros 11n wireless support (ath9k)"
+	depends on BACKPORTS_ATH_DRIVERS && BACKPORTS_MAC80211 && HAS_DMA
+	select BACKPORTS_WIRELESS_CRYPTO
+	select BACKPORTS_WIRELESS_REGULATORY
+	help
+	  This module adds support for Qualcomm Atheros 11n wireless
+	  chipsets including AR9280, AR9285, AR9287, and AR9380.
+
+	  ath9k supports:
+	  - 802.11n features with MIMO
+	  - Monitor mode and packet injection
+	  - Advanced debugging capabilities
+	  - Mesh networking
+	  - Legacy wireless security
+
+	  This driver is well-established and widely used for
+	  wireless security research and monitoring applications.
+
+	  Say M to build ath9k as a module, Y to build into kernel.
+
+config BACKPORTS_ATH9K_DEBUG
+	bool "Enable ath9k debugging"
+	depends on BACKPORTS_ATH9K && BACKPORTS_DEBUG
+	help
+	  Enable debugging support for ath9k driver.
+
+config BACKPORTS_ATH9K_DEBUGFS
+	bool "Enable ath9k debugfs support"
+	depends on BACKPORTS_ATH9K && DEBUG_FS
+	help
+	  Enable debugfs support for ath9k driver.
+
+# End of ATH drivers configuration
+
+#
+# Intel Wireless Driver Family
+#
+
+menuconfig BACKPORTS_IWLWIFI
+	tristate "Intel wireless support (iwlwifi)"
+	depends on BACKPORTS_WIRELESS_DRIVERS && BACKPORTS_MAC80211 && HAS_DMA
+	select BACKPORTS_WIRELESS_CRYPTO
+	select BACKPORTS_WIRELESS_REGULATORY
+	help
+	  This module adds support for Intel wireless chipsets including
+	  7260, 8260, 9260, AX200, AX210, and other Intel wireless devices.
+
+	  iwlwifi supports:
+	  - 802.11ac and 802.11ax (Wi-Fi 6) features
+	  - Advanced power management
+	  - Intel-specific optimizations
+	  - Monitor mode capabilities
+	  - Enterprise security features
+
+	  Supported chipset families:
+	  - 7000 series: 7260, 7265
+	  - 8000 series: 8260, 8265
+	  - 9000 series: 9260, 9560
+	  - AX series: AX200, AX201, AX210, AX211
+
+	  Say M to build iwlwifi as a module, Y to build into kernel.
+
+# IWLWIFI driver configuration (depends on BACKPORTS_IWLWIFI)
+
+config BACKPORTS_IWLWIFI_DEBUG
+	bool "Enable iwlwifi debugging"
+	depends on BACKPORTS_IWLWIFI && BACKPORTS_DEBUG
+	help
+	  Enable debugging support for iwlwifi driver.
+
+config BACKPORTS_IWLWIFI_DEBUGFS
+	bool "Enable iwlwifi debugfs support"
+	depends on BACKPORTS_IWLWIFI && DEBUG_FS
+	help
+	  Enable debugfs support for iwlwifi driver.
+
+config BACKPORTS_IWLWIFI_DEVICE_TRACING
+	bool "Enable iwlwifi device tracing"
+	depends on BACKPORTS_IWLWIFI && BACKPORTS_TRACING
+	help
+	  Enable device-level tracing for iwlwifi driver.
+
+# End of IWLWIFI driver configuration
+
+#
+# Ralink/MediaTek Driver Family
+#
+
+menuconfig BACKPORTS_RT2X00
+	tristate "Ralink/MediaTek wireless support (rt2x00)"
+	depends on BACKPORTS_WIRELESS_DRIVERS && BACKPORTS_MAC80211
+	select BACKPORTS_WIRELESS_CRYPTO
+	select BACKPORTS_WIRELESS_REGULATORY
+	help
+	  This module adds support for Ralink/MediaTek wireless chipsets
+	  including RT2500, RT2800, RT3070, RT5370, and other rt2x00 devices.
+
+	  rt2x00 supports:
+	  - 802.11n features
+	  - USB and PCIe interfaces
+	  - Monitor mode and packet injection
+	  - Power management
+	  - Multiple chipset variants
+
+	  Supported chipset families:
+	  - RT2500: Legacy 802.11g
+	  - RT2800: 802.11n USB/PCIe
+	  - RT3070: 802.11n USB
+	  - RT5370: 802.11n USB with enhanced features
+
+	  Say M to build rt2x00 as a module, Y to build into kernel.
+
+# RT2X00 driver configuration (depends on BACKPORTS_RT2X00)
+
+config BACKPORTS_RT2X00_DEBUG
+	bool "Enable rt2x00 debugging"
+	depends on BACKPORTS_RT2X00 && BACKPORTS_DEBUG
+	help
+	  Enable debugging support for rt2x00 driver family.
+
+config BACKPORTS_RT2X00_DEBUGFS
+	bool "Enable rt2x00 debugfs support"
+	depends on BACKPORTS_RT2X00 && DEBUG_FS
+	help
+	  Enable debugfs support for rt2x00 driver family.
+
+# End of RT2X00 driver configuration
+
+#
+# Realtek RTW88 Driver Family
+#
+
+menuconfig BACKPORTS_RTW88
+	tristate "Realtek RTW88 wireless support"
+	depends on BACKPORTS_WIRELESS_DRIVERS && BACKPORTS_MAC80211
+	select BACKPORTS_WIRELESS_CRYPTO
+	select BACKPORTS_WIRELESS_REGULATORY
+	help
+	  This module adds support for Realtek RTW88 wireless chipsets
+	  including RTL8822BE, RTL8822CE, RTL8821CE, and RTL8723DE.
+
+	  RTW88 supports:
+	  - 802.11ac features with MIMO
+	  - USB and PCIe interfaces
+	  - Monitor mode capabilities
+	  - Power management
+	  - Advanced debugging features
+
+	  Supported chipset families:
+	  - RTL8822B: 802.11ac 2x2 PCIe/USB
+	  - RTL8822C: 802.11ac 2x2 PCIe/USB
+	  - RTL8821C: 802.11ac 1x1 PCIe/USB
+	  - RTL8723D: 802.11n 1x1 USB
+
+	  Say M to build RTW88 as a module, Y to build into kernel.
+
+# RTW88 driver configuration (depends on BACKPORTS_RTW88)
+
+config BACKPORTS_RTW88_CORE
+	tristate
+	depends on BACKPORTS_RTW88
+
+config BACKPORTS_RTW88_PCI
+	tristate
+	depends on BACKPORTS_RTW88_CORE && PCI
+
+config BACKPORTS_RTW88_USB
+	tristate "RTW88 USB interface support"
+	depends on BACKPORTS_RTW88_CORE && USB
+	default y if BACKPORTS_RTW88
+	help
+	  Enable USB interface support for RTW88 drivers.
+	  This is required for USB-based Realtek wireless devices.
+
+config BACKPORTS_RTW88_8822B
+	tristate "RTL8822BE/RTL8822BU support"
+	depends on BACKPORTS_RTW88_CORE
+	help
+	  Enable support for RTL8822BE (PCIe) and RTL8822BU (USB)
+	  802.11ac 2x2 wireless chipsets.
+
+config BACKPORTS_RTW88_8822C
+	tristate "RTL8822CE/RTL8822CU support"
+	depends on BACKPORTS_RTW88_CORE
+	help
+	  Enable support for RTL8822CE (PCIe) and RTL8822CU (USB)
+	  802.11ac 2x2 wireless chipsets with enhanced features.
+
+config BACKPORTS_RTW88_8821C
+	tristate "RTL8821CE/RTL8821CU support"
+	depends on BACKPORTS_RTW88_CORE
+	help
+	  Enable support for RTL8821CE (PCIe) and RTL8821CU (USB)
+	  802.11ac 1x1 wireless chipsets.
+
+config BACKPORTS_RTW88_8723D
+	tristate "RTL8723DE/RTL8723DU support"
+	depends on BACKPORTS_RTW88_CORE
+	help
+	  Enable support for RTL8723DE (PCIe) and RTL8723DU (USB)
+	  802.11n 1x1 wireless chipsets with Bluetooth combo.
+
+config BACKPORTS_RTW88_DEBUG
+	bool "Enable RTW88 debugging"
+	depends on BACKPORTS_RTW88 && BACKPORTS_DEBUG
+	help
+	  Enable debugging support for RTW88 driver family.
+
+config BACKPORTS_RTW88_DEBUGFS
+	bool "Enable RTW88 debugfs support"
+	depends on BACKPORTS_RTW88 && DEBUG_FS
+	help
+	  Enable debugfs support for RTW88 driver family.
+
+# End of RTW88 driver configuration
+
+#
+# MediaTek Driver Family
+#
+
+menuconfig BACKPORTS_MT76
+	tristate "MediaTek MT76 wireless support"
+	depends on BACKPORTS_WIRELESS_DRIVERS && BACKPORTS_MAC80211
+	select BACKPORTS_WIRELESS_CRYPTO
+	select BACKPORTS_WIRELESS_REGULATORY
+	help
+	  This module adds support for MediaTek MT76 wireless chipsets
+	  including MT7601U, MT7610U, MT7612U, MT7663U, and MT7921U.
+
+	  MT76 supports:
+	  - 802.11n and 802.11ac features
+	  - USB and PCIe interfaces (USB focus for this build)
+	  - Monitor mode and packet injection
+	  - Advanced power management
+	  - Multi-band support
+
+	  Supported USB chipset families:
+	  - MT7601U: 802.11n 1x1 USB
+	  - MT7610U: 802.11ac 1x1 USB
+	  - MT7612U: 802.11ac 2x2 USB
+	  - MT7663U: 802.11ac 2x2 USB with enhanced features
+	  - MT7921U: 802.11ax 2x2 USB (Wi-Fi 6)
+
+	  Say M to build MT76 as a module, Y to build into kernel.
+
+# MT76 driver configuration (depends on BACKPORTS_MT76)
+
+config BACKPORTS_MT76_CORE
+	tristate
+	depends on BACKPORTS_MT76
+
+config BACKPORTS_MT76_USB
+	tristate "MT76 USB interface support"
+	depends on BACKPORTS_MT76_CORE && USB
+	default y if BACKPORTS_MT76
+	help
+	  Enable USB interface support for MT76 drivers.
+	  This is required for USB-based MediaTek wireless devices.
+
+config BACKPORTS_MT7601U
+	tristate "MediaTek MT7601U USB support"
+	depends on BACKPORTS_MT76_USB
+	help
+	  Enable support for MediaTek MT7601U USB 802.11n 1x1
+	  wireless chipset. This is a popular low-cost USB adapter.
+
+config BACKPORTS_MT7610U
+	tristate "MediaTek MT7610U USB support"
+	depends on BACKPORTS_MT76_USB
+	help
+	  Enable support for MediaTek MT7610U USB 802.11ac 1x1
+	  wireless chipset with dual-band support.
+
+config BACKPORTS_MT7612U
+	tristate "MediaTek MT7612U USB support"
+	depends on BACKPORTS_MT76_USB
+	help
+	  Enable support for MediaTek MT7612U USB 802.11ac 2x2
+	  wireless chipset with high-performance features.
+
+config BACKPORTS_MT7663U
+	tristate "MediaTek MT7663U USB support"
+	depends on BACKPORTS_MT76_USB
+	help
+	  Enable support for MediaTek MT7663U USB 802.11ac 2x2
+	  wireless chipset with enhanced power management.
+
+config BACKPORTS_MT7921U
+	tristate "MediaTek MT7921U USB support"
+	depends on BACKPORTS_MT76_USB
+	help
+	  Enable support for MediaTek MT7921U USB 802.11ax 2x2
+	  wireless chipset with Wi-Fi 6 features.
+
+config BACKPORTS_MT76_DEBUG
+	bool "Enable MT76 debugging"
+	depends on BACKPORTS_MT76 && BACKPORTS_DEBUG
+	help
+	  Enable debugging support for MT76 driver family.
+
+config BACKPORTS_MT76_DEBUGFS
+	bool "Enable MT76 debugfs support"
+	depends on BACKPORTS_MT76 && DEBUG_FS
+	help
+	  Enable debugfs support for MT76 driver family.
+
+# End of MT76 driver configuration
+
+#
+# Advanced Wireless Features
+#
+
+config BACKPORTS_WIRELESS_MONITOR_ENHANCED
+	bool "Enhanced monitor mode support for wireless drivers"
+	depends on BACKPORTS_WIRELESS_DRIVERS && BACKPORTS_MONITOR_MODE
+	help
+	  Enable enhanced monitor mode support specifically optimized
+	  for modern wireless drivers. This provides additional features
+	  beyond basic monitor mode.
+
+	  Enhanced monitor mode features:
+	  - Multi-channel monitoring
+	  - Advanced filtering capabilities
+	  - Hardware timestamping
+	  - Enhanced radiotap headers
+	  - Driver-specific optimizations
+
+	  This is useful for advanced wireless analysis and research.
+
+	  Say Y to enable enhanced monitor mode.
+
+config BACKPORTS_WIRELESS_INJECTION_ENHANCED
+	bool "Enhanced frame injection support for wireless drivers"
+	depends on BACKPORTS_WIRELESS_DRIVERS && BACKPORTS_FRAME_INJECTION
+	help
+	  Enable enhanced frame injection support specifically optimized
+	  for modern wireless drivers. This provides additional capabilities
+	  beyond basic frame injection.
+
+	  Enhanced injection features:
+	  - Hardware-accelerated injection
+	  - Precise timing control
+	  - Advanced rate control
+	  - Multi-antenna injection
+	  - Driver-specific optimizations
+
+	  This is useful for advanced wireless testing and research.
+
+	  Say Y to enable enhanced frame injection.
+
+config BACKPORTS_WIRELESS_MESH_ENHANCED
+	bool "Enhanced mesh networking for wireless drivers"
+	depends on BACKPORTS_WIRELESS_DRIVERS && BACKPORTS_WIRELESS_MESH
+	help
+	  Enable enhanced mesh networking features specifically optimized
+	  for modern wireless drivers.
+
+	  Enhanced mesh features:
+	  - Hardware-accelerated mesh forwarding
+	  - Advanced path selection algorithms
+	  - Mesh power save optimizations
+	  - Multi-radio mesh support
+	  - Driver-specific mesh optimizations
+
+	  This provides improved performance and features for mesh networks.
+
+	  Say Y to enable enhanced mesh networking.
+
+config BACKPORTS_WIRELESS_SECURITY_ENHANCED
+	bool "Enhanced security features for wireless drivers"
+	depends on BACKPORTS_WIRELESS_DRIVERS && BACKPORTS_WIRELESS_CRYPTO
+	help
+	  Enable enhanced security features specifically optimized
+	  for modern wireless drivers.
+
+	  Enhanced security features:
+	  - Hardware-accelerated encryption
+	  - Advanced key management
+	  - Enhanced authentication protocols
+	  - Security monitoring and auditing
+	  - Driver-specific security optimizations
+
+	  This provides improved security performance and features.
+
+	  Say Y to enable enhanced security features.
+
+# End of wireless drivers configuration
+#
+
+# Kernel Version Compatibility Layer
+#
+
+config BACKPORTS_KERNEL_COMPAT
+	bool "Enable kernel version compatibility layer"
+	default y
+	depends on BACKPORTS
+	help
+	  Enable kernel version compatibility layer that provides
+	  compatibility shims and API adaptations for different
+	  kernel versions.
+
+	  The compatibility layer provides:
+	  - Kernel API compatibility shims
+	  - Android kernel 4.19 specific optimizations
+	  - Mobile platform power management integration
+	  - Regulatory compliance enforcement
+	  - Cross-version wireless stack compatibility
+
+	  This is essential for supporting wireless drivers across
+	  different kernel versions and platforms.
+
+	  Say Y to enable kernel compatibility layer.
+
+config BACKPORTS_ANDROID_COMPAT
+	bool "Enable Android kernel compatibility"
+	default y if ANDROID
+	depends on BACKPORTS_KERNEL_COMPAT
+	help
+	  Enable Android-specific compatibility features including
+	  integration with Android's power management, security
+	  model, and wireless framework.
+
+	  Android compatibility includes:
+	  - Android wakelock integration
+	  - Android power management optimization
+	  - Android security policy compliance
+	  - Android property system integration
+	  - Android framework callbacks
+
+	  This is required for proper operation on Android kernels.
+
+	  Say Y if building for Android kernel.
+
+config BACKPORTS_MOBILE_PLATFORM_COMPAT
+	bool "Enable mobile platform optimizations"
+	default y if ARM || ARM64 || ANDROID
+	depends on BACKPORTS_KERNEL_COMPAT
+	help
+	  Enable mobile platform specific optimizations including
+	  power management, battery optimization, and performance
+	  tuning for ARM-based mobile devices.
+
+	  Mobile platform optimizations include:
+	  - Advanced power management
+	  - Battery optimization algorithms
+	  - Mobile-specific memory management
+	  - Suspend/resume optimization
+	  - Runtime power management integration
+
+	  This is recommended for ARM-based mobile devices.
+
+	  Say Y for mobile platforms.
+
+config BACKPORTS_REGULATORY_ENFORCEMENT
+	bool "Enable regulatory compliance enforcement"
+	default y
+	depends on BACKPORTS_KERNEL_COMPAT
+	help
+	  Enable strict regulatory compliance enforcement across
+	  different kernel versions and regulatory domains.
+
+	  Regulatory enforcement includes:
+	  - Cross-version regulatory API compatibility
+	  - Domain-specific feature restrictions
+	  - Monitor mode and injection compliance
+	  - Power limit enforcement
+	  - Channel restriction enforcement
+
+	  This ensures compliance with local regulations.
+
+	  Say Y to enable regulatory enforcement.
+
+config BACKPORTS_POWER_COMPAT
+	bool "Enable power management compatibility"
+	default y if BACKPORTS_MOBILE_PLATFORM_COMPAT
+	depends on BACKPORTS_KERNEL_COMPAT
+	help
+	  Enable power management compatibility layer for mobile
+	  platforms with battery optimization and suspend/resume
+	  support.
+
+	  Power management compatibility includes:
+	  - Runtime power management integration
+	  - Battery optimization algorithms
+	  - Suspend/resume state management
+	  - Mobile platform power hints
+	  - Android power management integration
+
+	  This is essential for proper power management on mobile
+	  devices and Android platforms.
+
+	  Say Y to enable power management compatibility.
+
+# End of kernel compatibility configuration

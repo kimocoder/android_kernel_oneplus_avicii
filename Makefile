@@ -1491,6 +1491,10 @@ modules: $(vmlinux-dirs) $(if $(KBUILD_BUILTIN),vmlinux) modules.builtin
 	$(Q)$(AWK) '!x[$$0]++' $(vmlinux-dirs:%=$(objtree)/%/modules.order) > $(objtree)/modules.order
 	@$(kecho) '  Building modules, stage 2.';
 	$(Q)$(MAKE) -f $(srctree)/scripts/Makefile.modpost
+ifdef CONFIG_BACKPORTS
+	@$(kecho) '  Building backports modules.';
+	$(Q)$(MAKE) -f $(srctree)/backports-integration/Makefile
+endif
 
 modules.builtin: $(vmlinux-dirs:%=%/modules.builtin)
 	$(Q)$(AWK) '!x[$$0]++' $^ > $(objtree)/modules.builtin
@@ -1526,6 +1530,10 @@ _modinst_:
 # boot script depmod is the master version.
 PHONY += _modinst_post
 _modinst_post: _modinst_
+ifdef CONFIG_BACKPORTS
+	@$(kecho) '  Installing backports modules.';
+	$(Q)$(MAKE) -f $(srctree)/backports-integration/Makefile backports_install
+endif
 	$(call cmd,depmod)
 
 ifeq ($(CONFIG_MODULE_SIG), y)
@@ -1584,6 +1592,10 @@ vmlinuxclean:
 	$(Q)$(if $(ARCH_POSTLINK), $(MAKE) -f $(ARCH_POSTLINK) clean)
 
 clean: archclean vmlinuxclean
+ifdef CONFIG_BACKPORTS
+	@$(kecho) '  Cleaning backports.';
+	$(Q)$(MAKE) -f $(srctree)/backports-integration/Makefile backports_clean
+endif
 
 # mrproper - Delete all generated files, including .config
 #
@@ -1596,6 +1608,10 @@ $(mrproper-dirs):
 	$(Q)$(MAKE) $(clean)=$(patsubst _mrproper_%,%,$@)
 
 mrproper: clean archmrproper $(mrproper-dirs)
+ifdef CONFIG_BACKPORTS
+	@$(kecho) '  Dist-cleaning backports.';
+	$(Q)$(MAKE) -f $(srctree)/backports-integration/Makefile backports_distclean
+endif
 	$(call cmd,rmdirs)
 	$(call cmd,rmfiles)
 

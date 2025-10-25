@@ -1,0 +1,34 @@
+#
+# Test Backports Configuration
+#
+
+menuconfig BACKPORTS
+	bool "Enable Linux Kernel Backports"
+	depends on (!CFG80211 && !MAC80211) || EXPERT
+	help
+	  Enable modern wireless stack backported from newer kernels.
+
+choice
+	prompt "Wireless stack selection"
+	depends on BACKPORTS && EXPERT && (CFG80211 || MAC80211)
+	default BACKPORTS_FORCE_DISABLE_LEGACY
+	help
+	  Choose between backports and legacy wireless drivers.
+
+config BACKPORTS_FORCE_DISABLE_LEGACY
+	bool "Use backports (disable legacy cfg80211/mac80211)"
+	help
+	  Force disable legacy cfg80211 and mac80211 to use backports.
+
+config BACKPORTS_COEXIST_LEGACY
+	bool "Allow coexistence (EXPERT ONLY)"
+	help
+	  Allow backports to coexist with legacy drivers.
+
+endchoice
+
+config BACKPORTS_CFG80211
+	tristate "cfg80211 - wireless configuration API"
+	depends on BACKPORTS
+	help
+	  cfg80211 is the Linux wireless LAN configuration API.

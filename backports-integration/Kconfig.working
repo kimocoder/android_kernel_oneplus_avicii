@@ -1,0 +1,50 @@
+#
+# Linux Kernel Backports Configuration
+#
+
+menuconfig BACKPORTS
+	bool "Enable Linux Kernel Backports"
+	depends on (!CFG80211 && !MAC80211) || EXPERT
+	help
+	  Enable modern wireless stack backported from newer kernels.
+	  This provides cfg80211/mac80211 from kernel 6.1 on kernel 4.19.
+
+	  Say Y here to enable backports support.
+
+	  If unsure, say N.
+
+config BACKPORTS_CFG80211
+	tristate "cfg80211 - wireless configuration API"
+	depends on BACKPORTS
+	help
+	  cfg80211 is the Linux wireless LAN configuration API.
+	  It provides a unified interface for wireless device configuration
+	  and management.
+
+config BACKPORTS_MAC80211
+	tristate "Generic IEEE 802.11 Networking Stack (mac80211)"
+	depends on BACKPORTS_CFG80211
+	help
+	  This option enables the hardware independent IEEE 802.11
+	  networking stack (mac80211).
+
+config BACKPORTS_MONITOR_MODE
+	bool "Enable monitor mode support"
+	depends on BACKPORTS_MAC80211
+	help
+	  Enable monitor mode for packet capture and injection.
+
+config BACKPORTS_FRAME_INJECTION
+	bool "Enable frame injection support"
+	depends on BACKPORTS_MONITOR_MODE
+	help
+	  Enable raw 802.11 frame injection capabilities.
+
+	  WARNING: This feature can be used for security testing
+	  and may have security implications.
+
+config BACKPORTS_DEBUG
+	bool "Enable backports debugging"
+	depends on BACKPORTS
+	help
+	  Enable debugging features for backports components.

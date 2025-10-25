@@ -1,0 +1,283 @@
+drivers:
+  ath10k:
+    android_compatible: true
+    capabilities:
+    - monitor_mode
+    - packet_injection
+    - mesh_networking
+    - spectral_scan
+    config_options:
+      CONFIG_ATH10K: m
+      CONFIG_ATH10K_DEBUG: y
+      CONFIG_ATH10K_DEBUGFS: y
+    conflicts:
+    - ath11k
+    - qcacld
+    dependencies:
+    - mac80211
+    - cfg80211
+    - crypto
+    description: Qualcomm Atheros 11ac wireless driver
+    family: ath10k
+    kernel_module: ath10k_core
+    max_kernel_version: null
+    min_kernel_version: '3.10'
+    name: ath10k
+    supported_chipsets:
+    - antenna_config: 3x3
+      capabilities:
+      - packet_injection
+      - spectral_scan
+      - mesh_networking
+      - multi_antenna
+      - monitor_mode
+      firmware_files:
+      - ath10k/QCA988X/hw2.0/firmware.bin
+      firmware_required: true
+      frequency_bands:
+      - 2.4GHz
+      - 5GHz
+      interface: PCIe
+      max_speed_mbps: 867
+      model: QCA988X
+      power_consumption_mw: null
+      standards:
+      - 802.11ac
+      vendor: Qualcomm
+    - antenna_config: 2x2
+      capabilities:
+      - mesh_networking
+      - packet_injection
+      - power_management
+      - monitor_mode
+      firmware_files:
+      - ath10k/QCA6174/hw3.0/firmware.bin
+      firmware_required: true
+      frequency_bands:
+      - 2.4GHz
+      - 5GHz
+      interface: PCIe
+      max_speed_mbps: 867
+      model: QCA6174
+      power_consumption_mw: null
+      standards:
+      - 802.11ac
+      vendor: Qualcomm
+    vendor: Qualcomm
+  ath11k:
+    android_compatible: true
+    capabilities:
+    - packet_injection
+    - power_management
+    - spectral_scan
+    - wpa3_support
+    - monitor_mode
+    - mesh_networking
+    - sae_support
+    - owe_support
+    config_options:
+      CONFIG_ATH11K: m
+      CONFIG_ATH11K_DEBUG: y
+      CONFIG_ATH11K_DEBUGFS: y
+      CONFIG_ATH11K_SPECTRAL: y
+    conflicts:
+    - ath10k
+    - qcacld
+    dependencies:
+    - mac80211
+    - cfg80211
+    - crypto
+    description: Qualcomm Atheros 11ac/11ax wireless driver
+    family: ath11k
+    kernel_module: ath11k
+    max_kernel_version: null
+    min_kernel_version: '4.19'
+    name: ath11k
+    supported_chipsets:
+    - antenna_config: 2x2
+      capabilities:
+      - packet_injection
+      - power_management
+      - wpa3_support
+      - monitor_mode
+      - mesh_networking
+      - mu_mimo
+      - ofdma
+      - sae_support
+      - owe_support
+      firmware_files:
+      - ath11k/QCA6390/hw2.0/amss.bin
+      - ath11k/QCA6390/hw2.0/m3.bin
+      firmware_required: true
+      frequency_bands:
+      - 2.4GHz
+      - 5GHz
+      interface: PCIe
+      max_speed_mbps: 1200
+      model: QCA6390
+      power_consumption_mw: null
+      standards:
+      - 802.11ax
+      vendor: Qualcomm
+    - antenna_config: 2x2
+      capabilities:
+      - packet_injection
+      - power_management
+      - wpa3_support
+      - monitor_mode
+      - beamforming
+      - mesh_networking
+      - mu_mimo
+      - ofdma
+      - sae_support
+      - owe_support
+      firmware_files:
+      - ath11k/QCA6490/hw2.0/amss.bin
+      - ath11k/QCA6490/hw2.0/m3.bin
+      firmware_required: true
+      frequency_bands:
+      - 2.4GHz
+      - 5GHz
+      interface: PCIe
+      max_speed_mbps: 1800
+      model: QCA6490
+      power_consumption_mw: null
+      standards:
+      - 802.11ax
+      vendor: Qualcomm
+    - antenna_config: 2x2
+      capabilities:
+      - packet_injection
+      - power_management
+      - wpa3_support
+      - monitor_mode
+      - mesh_networking
+      - mu_mimo
+      - ofdma
+      - sae_support
+      - owe_support
+      firmware_files:
+      - ath11k/WCN6855/hw2.0/amss.bin
+      - ath11k/WCN6855/hw2.0/m3.bin
+      firmware_required: true
+      frequency_bands:
+      - 2.4GHz
+      - 5GHz
+      interface: PCIe
+      max_speed_mbps: 1200
+      model: WCN6855
+      power_consumption_mw: null
+      standards:
+      - 802.11ax
+      vendor: Qualcomm
+    - antenna_config: 4x4
+      capabilities:
+      - packet_injection
+      - spectral_scan
+      - wpa3_support
+      - monitor_mode
+      - beamforming
+      - mesh_networking
+      - mu_mimo
+      - ofdma
+      - multi_antenna
+      - sae_support
+      - owe_support
+      firmware_files:
+      - ath11k/QCN9074/hw1.0/amss.bin
+      - ath11k/QCN9074/hw1.0/m3.bin
+      firmware_required: true
+      frequency_bands:
+      - 2.4GHz
+      - 5GHz
+      - 6GHz
+      interface: PCIe
+      max_speed_mbps: 4800
+      model: QCN9074
+      power_consumption_mw: null
+      standards:
+      - 802.11ax
+      vendor: Qualcomm
+    vendor: Qualcomm
+  iwlwifi:
+    android_compatible: true
+    capabilities:
+    - power_management
+    - wpa3_support
+    - monitor_mode
+    - sae_support
+    - owe_support
+    config_options:
+      CONFIG_IWLWIFI: m
+      CONFIG_IWLWIFI_DEBUG: y
+    conflicts: []
+    dependencies:
+    - mac80211
+    - cfg80211
+    - crypto
+    description: Intel wireless driver
+    family: iwlwifi
+    kernel_module: iwlwifi
+    max_kernel_version: null
+    min_kernel_version: '4.19'
+    name: iwlwifi
+    supported_chipsets:
+    - antenna_config: 2x2
+      capabilities:
+      - owe_support
+      - power_management
+      - wpa3_support
+      - mu_mimo
+      - ofdma
+      - sae_support
+      - monitor_mode
+      firmware_files:
+      - iwlwifi-cc-a0-50.ucode
+      firmware_required: true
+      frequency_bands:
+      - 2.4GHz
+      - 5GHz
+      interface: PCIe
+      max_speed_mbps: 2400
+      model: AX200
+      power_consumption_mw: null
+      standards:
+      - 802.11ax
+      vendor: Intel
+    vendor: Intel
+  rt2x00:
+    android_compatible: true
+    capabilities:
+    - packet_injection
+    - monitor_mode
+    config_options:
+      CONFIG_RT2X00: m
+      CONFIG_RT2X00_DEBUG: y
+    conflicts: []
+    dependencies:
+    - mac80211
+    - cfg80211
+    description: Ralink/MediaTek wireless driver
+    family: rt2x00
+    kernel_module: rt2x00lib
+    max_kernel_version: null
+    min_kernel_version: '3.10'
+    name: rt2x00
+    supported_chipsets:
+    - antenna_config: 1x1
+      capabilities:
+      - packet_injection
+      - monitor_mode
+      firmware_files:
+      - rt2870.bin
+      firmware_required: true
+      frequency_bands:
+      - 2.4GHz
+      interface: USB
+      max_speed_mbps: 150
+      model: RT5370
+      power_consumption_mw: null
+      standards:
+      - 802.11n
+      vendor: Ralink
+    vendor: Ralink
