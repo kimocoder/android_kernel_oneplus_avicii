@@ -10,7 +10,9 @@ on:
              description: 'Build Changelog'
              required: true
              default: '* No Changelog provided by the developer'
-  
+
+permissions:
+  contents: read
 env:
   TOKEN: ${{ secrets.TG_BOT_TOKEN }}
   CHATID: ${{ secrets.TG_CHAT_ID }}
