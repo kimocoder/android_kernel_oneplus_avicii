@@ -1,5 +1,6 @@
 /*
- * Copyright (c) 2018-2020 The Linux Foundation. All rights reserved.
+ * Copyright (c) 2018-2021 The Linux Foundation. All rights reserved.
+ * Copyright (c) 2023 Qualcomm Innovation Center, Inc. All rights reserved.
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -26,6 +27,7 @@
 #include <wlan_ext_mlme_obj_types.h>
 
 struct vdev_mlme_obj;
+struct cnx_mgr;
 
 /* Requestor ID for multiple vdev restart */
 #define MULTIPLE_VDEV_RESTART_REQ_ID 0x1234
@@ -54,6 +56,7 @@ struct vdev_mlme_obj;
 #define WLAN_VDEV_MLME_FLAGS_NON_MBSSID_AP      0x00000001
 #define WLAN_VDEV_MLME_FLAGS_TRANSMIT_AP        0x00000002
 #define WLAN_VDEV_MLME_FLAGS_NON_TRANSMIT_AP    0x00000004
+#define WLAN_VDEV_MLME_FLAGS_EMA_MODE           0x00000008
 
 /**
  * struct vdev_mlme_proto_generic - generic mlme proto structure
@@ -204,6 +207,9 @@ struct vdev_mlme_proto {
  * @disable_hw_ack: disable ha ack flag
  * @bssid: bssid
  * @phy_mode: phy mode
+ * @special_vdev_mode: indicates special vdev mode
+ * @is_sap_go_moved_1st_on_csa: Indicates if STA receives
+ *				CSA to a DFS channel
  */
 struct vdev_mlme_mgmt_generic {
 	uint32_t rts_threshold;
@@ -229,6 +235,8 @@ struct vdev_mlme_mgmt_generic {
 	bool disable_hw_ack;
 	uint8_t bssid[QDF_MAC_ADDR_SIZE];
 	uint32_t phy_mode;
+	bool special_vdev_mode;
+	bool is_sap_go_moved_1st_on_csa;
 };
 
 /**
@@ -243,9 +251,10 @@ struct vdev_mlme_mgmt_ap {
 
 /**
  * struct vdev_mlme_mgmt_sta - sta specific vdev mlme mgmt cfg
- * @.
+ * @he_mcs_12_13_map: map to indicate mcs12/13 caps of peer&dut
  */
 struct vdev_mlme_mgmt_sta {
+	uint16_t he_mcs_12_13_map;
 };
 
 /**
@@ -290,6 +299,7 @@ struct vdev_mlme_rate_info {
 #ifdef WLAN_BCN_RATECODE_ENABLE
 	uint32_t bcn_tx_rate_code;
 #endif
+	uint32_t rtscts_tx_rate;
 	uint8_t  type;
 	uint32_t lower32;
 	uint32_t higher32;
@@ -526,6 +536,8 @@ struct vdev_mlme_ops {
 	QDF_STATUS (*mlme_vdev_ext_peer_delete_all_rsp)(
 				struct vdev_mlme_obj *vdev_mlme,
 				struct peer_delete_all_response *rsp);
+	QDF_STATUS (*mlme_vdev_csa_complete)(
+				struct vdev_mlme_obj *vdev_mlme);
 };
 
 /**
@@ -535,9 +547,11 @@ struct vdev_mlme_ops {
  * @sm_lock:              VDEV SM lock
  * @vdev_cmd_lock:        VDEV MLME command atomicity
  * @sm_hdl:               VDEV SM handle
+ * @cnx_mgr_ctx: connection manager context, valid for STA and P2P-CLI mode only
  * @vdev: Pointer to vdev objmgr
  * @ops:                  VDEV MLME callback table
  * @ext_vdev_ptr:         VDEV MLME legacy pointer
+ * @reg_tpc_obj:          Regulatory transmit power info
  * @vdev_rt: VDEV response timer
  * @vdev_wakelock:  vdev wakelock sub structure
  */
@@ -549,9 +563,13 @@ struct vdev_mlme_obj {
 	qdf_mutex_t vdev_cmd_lock;
 #endif
 	struct wlan_sm *sm_hdl;
+	union {
+		struct cnx_mgr *cnx_mgr_ctx;
+	};
 	struct wlan_objmgr_vdev *vdev;
 	struct vdev_mlme_ops *ops;
 	mlme_vdev_ext_t *ext_vdev_ptr;
+	struct reg_tpc_power_info reg_tpc_obj;
 };
 
 /**
@@ -882,4 +900,134 @@ static inline uint32_t wlan_vdev_mlme_get_txmgmtrate(
 
 	return vdev_mlme->mgmt.rate_info.tx_mgmt_rate;
 }
+
+/**
+ * wlan_vdev_mlme_is_special_vdev() - check given vdev is a special vdev
+ * @vdev: VDEV object
+ *
+ * API to check given vdev is a special vdev.
+ *
+ * Return: true if given vdev is special vdev, else false
+ */
+static inline bool wlan_vdev_mlme_is_special_vdev(
+				struct wlan_objmgr_vdev *vdev)
+{
+	struct vdev_mlme_obj *vdev_mlme;
+
+	if (!vdev)
+		return false;
+
+	vdev_mlme = wlan_vdev_mlme_get_cmpt_obj(vdev);
+	if (!vdev_mlme)
+		return false;
+
+	return vdev_mlme->mgmt.generic.special_vdev_mode;
+}
+
+/**
+ * wlan_vdev_mlme_is_sap_go_move_before_sta() - check if SAP / GO
+ * moved to new channel before STA's movement upon receiving CSA
+ *
+ * @vdev: VDEV object
+ *
+ * API to check in STA+SAP/GO SCC concurrency, whether SAP / GO moved before
+ * STA's movement on receiving CSA from peer AP to connected STA.
+ *
+ * Return: true if SAP / GO moved before STA else false
+ */
+static inline
+bool wlan_vdev_mlme_is_sap_go_move_before_sta(struct wlan_objmgr_vdev *vdev)
+{
+	struct vdev_mlme_obj *vdev_mlme;
+
+	vdev_mlme = wlan_vdev_mlme_get_cmpt_obj(vdev);
+	if (!vdev_mlme)
+		return false;
+
+	return vdev_mlme->mgmt.generic.is_sap_go_moved_1st_on_csa;
+}
+
+/**
+ * wlan_vdev_mlme_set_sap_go_move_before_sta() - Set flag if SAP / GO
+ * moves to new channel before STA's movement upon receiving CSA
+ *
+ * @vdev: VDEV object
+ * @sap_go_moved_before_sta: Flag to indicate True when SAP / GO
+ *  moves before STA
+ *
+ * API to set True in STA+SAP/GO SCC concurrency, when SAP / GO moves before
+ * STA's movement on receiving CSA from peer AP to connected STA.
+ *
+ * Return: void
+ */
+static inline
+void wlan_vdev_mlme_set_sap_go_move_before_sta(struct wlan_objmgr_vdev *vdev,
+					       bool sap_go_moved_before_sta)
+{
+	struct vdev_mlme_obj *vdev_mlme;
+
+	vdev_mlme = wlan_vdev_mlme_get_cmpt_obj(vdev);
+	if (!vdev_mlme)
+		return;
+
+	vdev_mlme->mgmt.generic.is_sap_go_moved_1st_on_csa =
+						sap_go_moved_before_sta;
+}
+
+#ifdef WLAN_FEATURE_11AX
+/**
+ * wlan_vdev_mlme_set_he_mcs_12_13_map() - set he mcs12/13 map
+ * @vdev: VDEV object
+ * @he_mcs_12_13_map: he mcs12/13 map from self&peer
+ *
+ * API to set he mcs 12/13 map
+ *
+ * Return: void
+ */
+static inline void wlan_vdev_mlme_set_he_mcs_12_13_map(
+				struct wlan_objmgr_vdev *vdev,
+				uint16_t he_mcs_12_13_map)
+{
+	struct vdev_mlme_obj *vdev_mlme;
+
+	vdev_mlme = wlan_vdev_mlme_get_cmpt_obj(vdev);
+	if (!vdev_mlme)
+		return;
+
+	vdev_mlme->mgmt.sta.he_mcs_12_13_map = he_mcs_12_13_map;
+}
+
+/**
+ * wlan_vdev_mlme_get_he_mcs_12_13_map() - get he mcs12/13 map
+ * @vdev: VDEV object
+ *
+ * API to get he mcs12/13 support capability
+ *
+ * Return:
+ * @he_mcs_12_13_map: he mcs12/13 map
+ */
+static inline uint16_t wlan_vdev_mlme_get_he_mcs_12_13_map(
+				struct wlan_objmgr_vdev *vdev)
+{
+	struct vdev_mlme_obj *vdev_mlme;
+
+	vdev_mlme = wlan_vdev_mlme_get_cmpt_obj(vdev);
+	if (!vdev_mlme)
+		return 0;
+
+	return vdev_mlme->mgmt.sta.he_mcs_12_13_map;
+}
+#else
+static inline void wlan_vdev_mlme_set_he_mcs_12_13_map(
+				struct wlan_objmgr_vdev *vdev,
+				uint16_t he_mcs_12_13_map)
+{
+}
+
+static inline uint16_t wlan_vdev_mlme_get_he_mcs_12_13_map(
+				struct wlan_objmgr_vdev *vdev)
+{
+	return 0;
+}
+#endif
 #endif
