@@ -69,7 +69,7 @@
 #define CFG_ASSOC_STA_LIMIT CFG_UINT( \
 			"cfg_assoc_sta_limit", \
 			1, \
-			32, \
+			64, \
 			10, \
 			CFG_VALUE_OR_DEFAULT, \
 			"CFG_ASSOC_STA_LIMIT")
@@ -95,14 +95,6 @@
 			"gEnableLTECoex", \
 			0, \
 			"enabled lte coex")
-
-#define CFG_RMC_ACTION_PERIOD_FREQUENCY CFG_UINT( \
-			"cfg_rcm_action_period_frequency", \
-			100, \
-			1000, \
-			300, \
-			CFG_VALUE_OR_DEFAULT, \
-			"CFG_RMC_ACTION_PERIOD_FREQUENCY")
 
 /*
  * <ini>
@@ -269,8 +261,8 @@
  * <ini>
  * gSoftApMaxPeers - Set Max peers connected for SAP
  * @Min: 1
- * @Max: 32
- * @Default: 10
+ * @Max: 64
+ * @Default: 32
  *
  * This ini is used to set Max peers connected for SAP
  *
@@ -296,8 +288,8 @@
  #define CFG_SAP_MAX_NO_PEERS CFG_INI_UINT( \
 			"gSoftApMaxPeers", \
 			1, \
+			64, \
 			32, \
-			10, \
 			CFG_VALUE_OR_DEFAULT, \
 			"max no of peers")
 //endif /* OPLUS_BUG_COMPATIBILITY */
@@ -475,30 +467,6 @@
 			0, \
 			CFG_VALUE_OR_DEFAULT, \
 			"reduced beacon interval")
-/*
- * <ini>
- * gMaxLIModulatedDTIM - Set MaxLIModulate Dtim
- * @Min: 1
- * @Max: 10
- * @Default: 10
- *
- * This ini is used to set default MaxLIModulatedDTIM
- *
- * Related: None
- *
- * Supported Feature: STA
- *
- * Usage: Internal/External
- *
- * </ini>
- */
-#define CFG_MAX_LI_MODULATED_DTIM CFG_INI_UINT( \
-			"gMaxLIModulatedDTIM", \
-			1, \
-			10, \
-			10, \
-			CFG_VALUE_OR_DEFAULT, \
-			"Max modulated dtim")
 
 /*
  * <ini>
@@ -786,7 +754,6 @@
 	CFG(CFG_11G_ONLY_POLICY) \
 	CFG(CFG_ASSOC_STA_LIMIT) \
 	CFG(CFG_ENABLE_LTE_COEX) \
-	CFG(CFG_RMC_ACTION_PERIOD_FREQUENCY) \
 	CFG(CFG_RATE_FOR_TX_MGMT) \
 	CFG(CFG_RATE_FOR_TX_MGMT_2G) \
 	CFG(CFG_RATE_FOR_TX_MGMT_5G) \

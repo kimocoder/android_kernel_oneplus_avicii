@@ -1,5 +1,6 @@
 /*
  * Copyright (c) 2018-2020 The Linux Foundation. All rights reserved.
+ * Copyright (c) 2023 Qualcomm Innovation Center, Inc. All rights reserved.
  *
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
@@ -55,6 +56,12 @@ static QDF_STATUS policy_mgr_init_cfg(struct wlan_objmgr_psoc *psoc)
 		cfg_get(psoc, CFG_FORCE_1X1_FEATURE);
 	cfg->sta_sap_scc_on_dfs_chnl =
 		cfg_get(psoc, CFG_STA_SAP_SCC_ON_DFS_CHAN);
+
+	/*
+	 * Force set sta_sap_scc_on_dfs_chnl on Non-DBS HW so that standalone
+	 * SAP is not allowed on DFS channel on non-DBS HW, Also, force SCC in
+	 * case of STA+SAP
+	 */
 	if (cfg->sta_sap_scc_on_dfs_chnl == 2 &&
 	    !cfg_get(psoc, CFG_ENABLE_DFS_MASTER_CAPABILITY))
 		cfg->sta_sap_scc_on_dfs_chnl = 0;
@@ -68,6 +75,8 @@ static QDF_STATUS policy_mgr_init_cfg(struct wlan_objmgr_psoc *psoc)
 		cfg_get(psoc, CFG_MARK_INDOOR_AS_DISABLE_FEATURE);
 	cfg->go_force_scc = cfg_get(psoc, CFG_P2P_GO_ENABLE_FORCE_SCC);
 	cfg->prefer_5g_scc_to_dbs = cfg_get(psoc, CFG_PREFER_5G_SCC_TO_DBS);
+	cfg->move_sap_go_1st_on_dfs_sta_csa =
+		cfg_get(psoc, CFG_MOVE_SAP_GO_1ST_ON_DFS_STA_CSA);
 
 	return QDF_STATUS_SUCCESS;
 }
@@ -165,7 +174,7 @@ QDF_STATUS ucfg_policy_mgr_get_dynamic_mcc_adaptive_sch(
 }
 
 QDF_STATUS ucfg_policy_mgr_get_mcc_adaptive_sch(struct wlan_objmgr_psoc *psoc,
-						uint8_t *mcc_adaptive_sch)
+						bool *mcc_adaptive_sch)
 {
 	return policy_mgr_get_mcc_adaptive_sch(psoc, mcc_adaptive_sch);
 }
