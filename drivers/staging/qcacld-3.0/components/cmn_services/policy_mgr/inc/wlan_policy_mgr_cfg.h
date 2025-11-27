@@ -42,7 +42,7 @@
  *
  * Supported Feature: Concurrency
  *
- * Usage: External
+ * Usage: Internal/External
  *
  * </ini>
  */
@@ -68,7 +68,7 @@
  *
  * Supported Feature: DBS
  *
- * Usage: External
+ * Usage: Internal/External
  *
  * </ini>
  */
@@ -89,7 +89,7 @@
  *
  * Supported Feature: Concurrency
  *
- * Usage: External
+ * Usage: Internal/External
  *
  * </ini>
  */
@@ -147,7 +147,7 @@
  *
  * Supported Feature: DBS
  *
- * Usage: External
+ * Usage: Internal/External
  *
  * </ini>
  */
@@ -186,7 +186,7 @@
  *
  * Supported Feature: DBS
  *
- * Usage: External
+ * Usage: Internal/External
  *
  * </ini>
  */
@@ -210,7 +210,7 @@
  *
  * Supported Feature: Concurrency
  *
- * Usage: External
+ * Usage: Internal/External
  *
  * </ini>
  */
@@ -236,7 +236,7 @@
  *
  * Supported Feature: Concurrency
  *
- * Usage: External
+ * Usage: Internal/External
  *
  * </ini>
  */
@@ -258,13 +258,14 @@
  *
  * Supported Feature: Concurrency
  *
- * Usage: External
+ * Usage: Internal/External
  *
  * </ini>
  */
-#define CFG_ENABLE_MCC_ADAPTIVE_SCH_ENABLED_NAME CFG_INI_BOOL(\
+#define CFG_ENABLE_MCC_ADAPTIVE_SCH_ENABLED_NAME CFG_INI_UINT(\
 					"gEnableMCCAdaptiveScheduler", \
-					true, \
+					0, 1, 1, \
+					CFG_VALUE_OR_DEFAULT, \
 					"Enable/Disable MCC Adaptive Scheduler")
 
 /*
@@ -280,7 +281,7 @@
  *
  * Supported Feature: Concurrency
  *
- * Usage: External
+ * Usage: Internal/External
  *
  * </ini>
  */
@@ -318,7 +319,7 @@
  *
  * Supported Feature: Concurrency
  *
- * Usage: External
+ * Usage: Internal/External
  *
  * </ini>
  */
@@ -340,7 +341,7 @@ CFG_INI_UINT("gAllowMCCGODiffBI", 0, 4, 4, CFG_VALUE_OR_DEFAULT, \
  *
  * Supported Feature: STA
  *
- * Usage: External
+ * Usage: Internal/External
  *
  * </ini>
  */
@@ -375,7 +376,7 @@ CFG_INI_UINT("gEnableOverLapCh", 0, 1, 0, CFG_VALUE_OR_DEFAULT, \
  *
  * Supported Feature: DBS
  *
- * Usage: External
+ * Usage: Internal/External
  *
  * </ini>
  */
@@ -395,9 +396,6 @@ CFG_INI_UINT("gDualMacFeatureDisable", 0, 6, 6, CFG_VALUE_OR_DEFAULT, \
  * support disabled, the value is defined by enum PM_AP_DFS_MASTER_MODE.
  * 0 - Disallow STA+SAP SCC on DFS channel
  * 1 - Allow STA+SAP SCC on DFS channel with master mode disabled
- *       This needs gEnableDFSMasterCap enabled to allow SAP SCC with
- *       STA on DFS but dfs master mode disabled. Single SAP is not allowed
- *       on DFS.
  * 2 - enhance "1" with below requirement
  *	 a. Allow single SAP (GO) start on DFS channel.
  *	 b. Allow CAC process on DFS channel in single SAP (GO) mode
@@ -411,7 +409,7 @@ CFG_INI_UINT("gDualMacFeatureDisable", 0, 6, 6, CFG_VALUE_OR_DEFAULT, \
  *
  * Supported Feature: Non-DBS, DBS
  *
- * Usage: External
+ * Usage: Internal/External
  *
  * </ini>
  */
@@ -462,7 +460,7 @@ CFG_INI_UINT("gForce1x1Exception", 0, 2, 1, CFG_VALUE_OR_DEFAULT, \
  * Supported Feature: SAP
  *
  *
- * Usage: External
+ * Usage: Internal/External
  *
  * </ini>
  */
@@ -486,7 +484,7 @@ CFG_INI_UINT("gEnableSAPManadatoryChanList", 0, 1, 0, CFG_VALUE_OR_DEFAULT, \
  *
  * Supported Feature: Non-DBS, DBS
  *
- * Usage: External
+ * Usage: Internal/External
  *
  * </ini>
  */
@@ -509,7 +507,7 @@ CFG_INI_BOOL("g_nan_sap_scc_on_lte_coex_chan", 1, \
  *
  * Supported Feature: Non-DBS, DBS
  *
- * Usage: External
+ * Usage: Internal/External
  *
  * </ini>
  */
@@ -548,18 +546,11 @@ CFG_INI_UINT("g_mark_sap_indoor_as_disable", 0, 1, 0, CFG_VALUE_OR_DEFAULT, \
  * <ini>
  * g_enable_go_force_scc - Enable/Disable force SCC on P2P GO
  * @Min: 0
- * @Max: 2
+ * @Max: 1
  * @Default: 0
  *
  * This ini and along with "gWlanMccToSccSwitchMode" is used to enable
  * force SCC on P2P GO interface.
- *
- * GO_FORCE_SCC_DISABLED (value 0): GO force scc disabled and GO can come up
- * in MCC mode
- * GO_FORCE_SCC_STRICT (value 1): New GO will be forced to form on existing
- * GO/STA/GC channel in start bss itself.
- * GO_FORCE_SCC_LIBERAL (value 2): After SET KEY is done, do force SCC for the
- * first GO to move to new GO channel.
  *
  * Supported Feature: P2P GO
  *
@@ -569,7 +560,7 @@ CFG_INI_UINT("g_mark_sap_indoor_as_disable", 0, 1, 0, CFG_VALUE_OR_DEFAULT, \
  */
 
 #define CFG_P2P_GO_ENABLE_FORCE_SCC \
-CFG_INI_UINT("g_enable_go_force_scc", 0, 2, 0, CFG_VALUE_OR_DEFAULT, \
+CFG_INI_UINT("g_enable_go_force_scc", 0, 1, 0, CFG_VALUE_OR_DEFAULT, \
 	     "Enable/Disable P2P GO force SCC")
 
 /**
@@ -590,7 +581,7 @@ CFG_INI_UINT("g_enable_go_force_scc", 0, 2, 0, CFG_VALUE_OR_DEFAULT, \
  * Supported Feature: STA, SAP
  *
  *
- * Usage: External
+ * Usage: Internal/External
  *
  * </ini>
  */
@@ -621,48 +612,6 @@ CFG_INI_UINT("g_pcl_band_priority", 0, 1, 0, CFG_VALUE_OR_DEFAULT, \
 CFG_INI_UINT("g_prefer_5g_scc_to_dbs", 0, 0xFFFFFFFF, 0, CFG_VALUE_OR_DEFAULT, \
 	     "5G SCC has higher priority than DBS")
 
-/*
- * <ini>
- * g_move_sap_go_1st_on_dfs_sta_csa - Move SAP / GO first to enforce scc
- * @Min: 0
- * @Max: 1
- * @Default: 0
- *
- * This ini moves SAP / GO first to enforce scc in STA+SAP (GO) DFS SCC
- * 0 - Keep default MCC to SCC enforcement movement
- * 1 - Move SAP / GO first before STA's movement to non-DFS channel
- *
- * In STA+SAP / GO concurrency, SCC is enforced by moving SAP / GO
- * to STA's operating channel. STA side, if there is a CSA
- * then SCC will be enforced only after STA moves to new channel.
- *
- * In usecase of STA + GO SCC on DFS channel, CSA is sent with no-TX
- * and STA's movement will only happen once CSA count becomes 0.
- * This will block data transmission till then, which will have bad
- * user experience in case of XR where, it needs to have periodic data
- * transmission in every 1 second with GO interface.
- *
- * To resolve this, it is better to move GO / SAP first to allow 1
- * second periodic transmissions. And once the STA moves to new channel,
- * existing logic will be triggered to enforce SCC.
- *
- * This INI is added to change the behavior only in this specific case.
- * If this INI is set, then move SAP / GO first upon receiving very first
- * CSA from AP to a non-DFS channel. Current MCC to SCC rules will be applied
- * once STA moves to new channel after CSA count becomes 0.
- *
- * Dependency: g_sta_sap_scc_on_dfs_chan, g_enable_go_force_scc
- *
- * Supported Feature: SAP / P2P-GO
- *
- * Usage: External
- *
- * </ini>
- */
-#define CFG_MOVE_SAP_GO_1ST_ON_DFS_STA_CSA \
-CFG_INI_BOOL("g_move_sap_go_1st_on_dfs_sta_csa", 0, \
-	     "Move SAP / GO first to enforce scc on dfs sta csa")
-
 #define CFG_POLICY_MGR_ALL \
 		CFG(CFG_MCC_TO_SCC_SWITCH) \
 		CFG(CFG_CONC_SYS_PREF) \
@@ -685,6 +634,5 @@ CFG_INI_BOOL("g_move_sap_go_1st_on_dfs_sta_csa", 0, \
 		CFG(CFG_ALLOW_MCC_GO_DIFF_BI) \
 		CFG(CFG_P2P_GO_ENABLE_FORCE_SCC) \
 		CFG(CFG_PCL_BAND_PRIORITY) \
-		CFG(CFG_PREFER_5G_SCC_TO_DBS) \
-		CFG(CFG_MOVE_SAP_GO_1ST_ON_DFS_STA_CSA)
+		CFG(CFG_PREFER_5G_SCC_TO_DBS)
 #endif

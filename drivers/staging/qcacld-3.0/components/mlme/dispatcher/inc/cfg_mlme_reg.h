@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2020 The Linux Foundation. All rights reserved.
+ * Copyright (c) 2012-2019 The Linux Foundation. All rights reserved.
  *
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
@@ -22,6 +22,8 @@
 
 #ifndef CFG_MLME_REG_H__
 #define CFG_MLME_REG_H__
+
+#define VALID_CHANNEL_LIST_DEFAULT "36, 40, 44, 48, 52, 56, 60, 64, 1, 6, 11, 34, 38, 42, 46, 2, 3, 4,  5, 7, 8, 9, 10, 12, 13, 14, 100, 104, 108, 112, 116, 120, 124, 128, 132, 136, 140, 149, 151, 153, 155, 157, 159, 161, 50, 54, 58, 62, 240, 242, 244, 246, 248, 250, 252"
 
 /*
  * <ini>
@@ -104,27 +106,26 @@
 
 /*
  * <ini>
- * fcc_5dot9_ghz_chan_in_master_mode - Enable/disable 5.9 GHz channels in
- * master mode for US
+ * enable_nan_indoor_channel - Enable Indoor channels for NAN
  * @Min: 0
  * @Max: 1
  * @Default: 0
  *
- * fcc_5dot9_ghz_chan_in_master_mode is to enable/disable 5.9 GHz channels
- * in master mode for FCC reg domain
+ * This ini is used to support to indoor channels for NAN interface
+ * Customer can config this item to enable/disable NAN in indoor channel
  *
  * Related: None
  *
- * Supported Feature: SAP/P2P-GO
+ * Supported Feature: NAN
  *
- * Usage: Internal/External
+ * Usage: External
  *
  * </ini>
  */
-#define CFG_FCC_5DOT9_GHZ_CHAN_IN_MASTER_MODE CFG_INI_BOOL( \
-	"fcc_5dot9_ghz_chan_in_master_mode", \
+#define CFG_INDOOR_CHANNEL_SUPPORT_FOR_NAN CFG_INI_BOOL( \
+	"enable_nan_indoor_channel", \
 	0, \
-	"enable/disable FCC 5.9 GHz channels in master mode")
+	"enable/disable indoor channels for NAN")
 
 #ifdef SAP_AVOID_ACS_FREQ_LIST
 #define SAP_AVOID_ACS_FREQ_LIST_DEFAULT ""
@@ -241,6 +242,38 @@
 	CFG_VALUE_OR_DEFAULT, \
 	"set the 11d scan interval in FW")
 
+ /*
+  * valid_chan_list - Configure valid channel list
+  * @Default: VALID_CHANNEL_LIST_DEFAULT
+  *
+  * This ini is used to configure valid channel list
+  *
+  * Usage: Internal
+  *
+  */
+#define CFG_VALID_CHANNEL_LIST CFG_STRING( \
+		 "valid_chan_list", \
+		 0, \
+		 CFG_VALID_CHANNEL_LIST_STRING_LEN, \
+		 VALID_CHANNEL_LIST_DEFAULT, \
+		 "valid channel list")
+
+ /*
+  * country_code - Set country code
+  * @Default: NA
+  *
+  * This ini is used to set country code
+  *
+  * Usage: Internal
+  *
+  */
+#define CFG_COUNTRY_CODE CFG_STRING( \
+		 "country_code", \
+		 0, \
+		 CFG_COUNTRY_CODE_LEN, \
+		 "", \
+		 "country code")
+
 /*
  * <ini>
  * ignore_fw_reg_offload_ind - If set, Ignore the FW offload indication
@@ -250,6 +283,15 @@
  *
  * This ini is used to ignore regdb offload indication from FW and
  * regulatory will be treated as non offload.
+ * There is a case where FW is sending the offload indication in
+ * service ready event but not sending the cc list event
+ * WMI_REG_CHAN_LIST_CC_EVENTID and because of this driver is not
+ * able to populate the channel list. To address this issue, this ini
+ * is added. If this ini is enabled, regulatory will always be treated as
+ * non offload solution.
+ *
+ * This ini should only be enabled to circumvent the above mentioned firmware
+ * bug.
  *
  * Related: None
  *
@@ -315,10 +357,12 @@
 	CFG(CFG_ENABLE_PENDING_CHAN_LIST_REQ) \
 	CFG(CFG_ENABLE_11D_IN_WORLD_MODE) \
 	CFG(CFG_ETSI_SRD_CHAN_IN_MASTER_MODE) \
-	CFG(CFG_FCC_5DOT9_GHZ_CHAN_IN_MASTER_MODE) \
+	CFG(CFG_INDOOR_CHANNEL_SUPPORT_FOR_NAN) \
 	CFG(CFG_RESTART_BEACONING_ON_CH_AVOID) \
 	CFG(CFG_INDOOR_CHANNEL_SUPPORT) \
 	CFG(CFG_SCAN_11D_INTERVAL) \
+	CFG(CFG_VALID_CHANNEL_LIST) \
+	CFG(CFG_COUNTRY_CODE) \
 	CFG(CFG_IGNORE_FW_REG_OFFLOAD_IND) \
 	CFG(CFG_RETAIN_NOL_ACROSS_REG_DOMAIN) \
 	CFG_SAP_AVOID_ACS_FREQ_LIST_ALL

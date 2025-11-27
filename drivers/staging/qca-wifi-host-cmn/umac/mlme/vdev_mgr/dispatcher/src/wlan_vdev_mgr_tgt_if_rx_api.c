@@ -32,10 +32,6 @@
 #include <wlan_psoc_mlme_main.h>
 #include <include/wlan_psoc_mlme.h>
 #include <include/wlan_mlme_cmn.h>
-#ifdef WLAN_POLICY_MGR_ENABLE
-#include "wlan_policy_mgr_api.h"
-#endif
-#include <sir_api.h>
 
 struct vdev_response_timer *
 tgt_vdev_mgr_get_response_timer_info(struct wlan_objmgr_psoc *psoc,
@@ -215,7 +211,7 @@ static QDF_STATUS tgt_vdev_mgr_multi_vdev_restart_resp_handler(
 	return mlme_vdev_ops_ext_hdl_multivdev_restart_resp(psoc, resp);
 }
 
-#ifdef FEATURE_VDEV_OPS_WAKELOCK
+#ifdef FEATURE_VDEV_RSP_WAKELOCK
 static struct psoc_mlme_wakelock *
 tgt_psoc_get_wakelock_info(struct wlan_objmgr_psoc *psoc)
 {
@@ -244,39 +240,6 @@ tgt_psoc_reg_wakelock_info_rx_op(struct wlan_lmac_if_mlme_rx_ops
 }
 #endif
 
-#ifdef WLAN_POLICY_MGR_ENABLE
-static QDF_STATUS
-tgt_vdev_mgr_csa_received_handler(struct wlan_objmgr_psoc *psoc,
-				  uint8_t vdev_id,
-				  struct csa_offload_params *csa_event)
-{
-	if (!psoc) {
-		mlme_err("PSOC is NULL");
-		return QDF_STATUS_E_INVAL;
-	}
-	if (!csa_event) {
-		mlme_err("CSA IE Received Event is NULL");
-		return QDF_STATUS_E_INVAL;
-	}
-
-	/* If received CSA is with no-TX mode, then only move SAP / GO*/
-	if (!csa_event->switch_mode) {
-		mlme_err("CSA IE Received without no-Tx mode, ignoring 1st SAP / GO movement");
-		return QDF_STATUS_E_INVAL;
-	}
-
-	return policy_mgr_sta_sap_dfs_scc_conc_check(psoc, vdev_id, csa_event);
-}
-#else
-static QDF_STATUS
-tgt_vdev_mgr_csa_received_handler(struct wlan_objmgr_psoc *psoc,
-				  uint8_t vdev_id,
-				  struct csa_offload_params *csa_event)
-{
-	return QDF_STATUS_E_NOSUPPORT;
-}
-#endif
-
 void tgt_vdev_mgr_register_rx_ops(struct wlan_lmac_if_rx_ops *rx_ops)
 {
 	struct wlan_lmac_if_mlme_rx_ops *mlme_rx_ops = &rx_ops->mops;
@@ -297,7 +260,5 @@ void tgt_vdev_mgr_register_rx_ops(struct wlan_lmac_if_rx_ops *rx_ops)
 		tgt_vdev_mgr_get_response_timer_info;
 	mlme_rx_ops->vdev_mgr_multi_vdev_restart_resp =
 		tgt_vdev_mgr_multi_vdev_restart_resp_handler;
-	mlme_rx_ops->vdev_mgr_csa_received =
-		tgt_vdev_mgr_csa_received_handler;
 	tgt_psoc_reg_wakelock_info_rx_op(&rx_ops->mops);
 }

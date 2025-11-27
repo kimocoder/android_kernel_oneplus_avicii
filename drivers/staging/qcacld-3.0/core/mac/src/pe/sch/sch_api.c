@@ -81,11 +81,16 @@ QDF_STATUS sch_send_beacon_req(struct mac_context *mac, uint8_t *beaconPayload,
 	qdf_mem_copy(beaconParams->bssId, pe_session->bssId,
 		     sizeof(pe_session->bssId));
 
-
-	beaconParams->timIeOffset = pe_session->schBeaconOffsetBegin;
-	if (pe_session->dfsIncludeChanSwIe) {
-		beaconParams->csa_count_offset = mac->sch.csa_count_offset;
-		beaconParams->ecsa_count_offset = mac->sch.ecsa_count_offset;
+	if (LIM_IS_IBSS_ROLE(pe_session)) {
+		beaconParams->timIeOffset = 0;
+	} else {
+		beaconParams->timIeOffset = pe_session->schBeaconOffsetBegin;
+		if (pe_session->dfsIncludeChanSwIe) {
+			beaconParams->csa_count_offset =
+				mac->sch.csa_count_offset;
+			beaconParams->ecsa_count_offset =
+				mac->sch.ecsa_count_offset;
+		}
 	}
 
 	beaconParams->vdev_id = pe_session->smeSessionId;
@@ -217,8 +222,10 @@ uint32_t lim_send_probe_rsp_template_to_hal(struct mac_context *mac,
 		*/
 		addIeWoP2pIe = qdf_mem_malloc(pe_session->add_ie_params.
 						probeRespDataLen);
-		if (!addIeWoP2pIe)
+		if (!addIeWoP2pIe) {
+			pe_err("FAILED to alloc memory when removing P2P IE");
 			return QDF_STATUS_E_NOMEM;
+		}
 
 		retStatus = lim_remove_p2p_ie_from_add_ie(mac, pe_session,
 					addIeWoP2pIe, &addnIELenWoP2pIe);
@@ -231,6 +238,7 @@ uint32_t lim_send_probe_rsp_template_to_hal(struct mac_context *mac,
 		/*need to check the data length */
 		addIE = qdf_mem_malloc(addnIELenWoP2pIe);
 		if (!addIE) {
+			pe_err("Unable to get WNI_CFG_PROBE_RSP_ADDNIE_DATA1 length");
 			qdf_mem_free(addIeWoP2pIe);
 			return QDF_STATUS_E_NOMEM;
 		}
@@ -370,17 +378,14 @@ uint32_t lim_send_probe_rsp_template_to_hal(struct mac_context *mac,
 int sch_gen_timing_advert_frame(struct mac_context *mac_ctx, tSirMacAddr self_addr,
 	uint8_t **buf, uint32_t *timestamp_offset, uint32_t *time_value_offset)
 {
-<<<<<<< HEAD
 	tDot11fTimingAdvertisementFrame frame = {0};
-=======
-	tDot11fTimingAdvertisementFrame frame = {};
->>>>>>> 555c6502281e2565b9010687c148e0cda8f099fb
 	uint32_t payload_size, buf_size;
-	QDF_STATUS status;
-	uint32_t ret;
+	int status;
 	struct qdf_mac_addr wildcard_bssid = {
 		{0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF},
 	};
+
+	qdf_mem_zero((uint8_t *)&frame, sizeof(tDot11fTimingAdvertisementFrame));
 
 	/* Populate the TA fields */
 	status = populate_dot11f_timing_advert_frame(mac_ctx, &frame);
@@ -389,19 +394,12 @@ int sch_gen_timing_advert_frame(struct mac_context *mac_ctx, tSirMacAddr self_ad
 		return qdf_status_to_os_return(status);
 	}
 
-	ret = dot11f_get_packed_timing_advertisement_frame_size(mac_ctx,
+	status = dot11f_get_packed_timing_advertisement_frame_size(mac_ctx,
 		&frame, &payload_size);
-<<<<<<< HEAD
 	if (DOT11F_FAILED(status)) {
 		pe_err("Error getting packed frame size %x", status);
-=======
-	if (DOT11F_FAILED(ret)) {
-		pe_err("Error getting packed frame size %x", ret);
->>>>>>> 555c6502281e2565b9010687c148e0cda8f099fb
 		return -EINVAL;
 	}
-	if (DOT11F_WARNED(ret))
-		pe_warn("Warning getting packed frame size");
 
 	if (DOT11F_WARNED(status))
 		pe_warn("Warning getting packed frame size");
@@ -412,21 +410,14 @@ int sch_gen_timing_advert_frame(struct mac_context *mac_ctx, tSirMacAddr self_ad
 		return -ENOMEM;
 
 	payload_size = 0;
-	ret = dot11f_pack_timing_advertisement_frame(mac_ctx, &frame,
+	status = dot11f_pack_timing_advertisement_frame(mac_ctx, &frame,
 		*buf + sizeof(tSirMacMgmtHdr), buf_size -
 		sizeof(tSirMacMgmtHdr), &payload_size);
 	pe_debug("TA payload size2 = %d", payload_size);
-<<<<<<< HEAD
 	if (DOT11F_FAILED(status)) {
 		pe_err("Error packing frame %x", status);
-=======
-	if (DOT11F_FAILED(ret)) {
-		pe_err("Error packing frame %x", ret);
->>>>>>> 555c6502281e2565b9010687c148e0cda8f099fb
 		goto fail;
 	}
-	if (DOT11F_WARNED(ret))
-		pe_warn("Warning packing frame");
 
 	if (DOT11F_WARNED(status))
 		pe_warn("Warning packing frame");

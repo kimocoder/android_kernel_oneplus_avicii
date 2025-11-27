@@ -126,10 +126,6 @@ struct sap_context {
 	uint32_t chan_freq;
 	uint32_t sec_ch_freq;
 
-#ifdef DCS_INTERFERENCE_DETECTION
-	qdf_freq_t dcs_ch_freq;
-#endif
-
 	/* Include the SME(CSR) sessionId here */
 	uint8_t sessionId;
 
@@ -221,7 +217,7 @@ struct sap_context {
 	bool vendor_acs_dfs_lte_enabled;
 	uint8_t dfs_vendor_channel;
 	uint8_t dfs_vendor_chan_bw;
-	qdf_freq_t freq_before_pre_cac;
+	uint8_t chan_before_pre_cac;
 	uint16_t beacon_tx_rate;
 	enum sap_acs_dfs_mode dfs_mode;
 	wlan_scan_requester req_id;
@@ -230,13 +226,6 @@ struct sap_context {
 	bool is_chan_change_inprogress;
 	qdf_list_t owe_pending_assoc_ind_list;
 	uint32_t freq_before_ch_switch;
-#ifdef WLAN_FEATURE_P2P_P2P_STA
-/*
- *This param is used for GO+GO force scc logic where after
- *setkey first GO will move to latest GO's channel
- */
-	bool is_forcescc_restart_required;
-#endif
 };
 
 /*----------------------------------------------------------------------------
@@ -447,11 +436,11 @@ void sap_scan_event_callback(struct wlan_objmgr_vdev *vdev,
  *
  * process radar indication.
  *
- * Return: frequency to which sap wishes to switch.
+ * Return: channel to which sap wishes to switch.
  */
-qdf_freq_t sap_indicate_radar(struct sap_context *sap_ctx);
+uint8_t sap_indicate_radar(struct sap_context *sap_ctx);
 #else
-static inline qdf_freq_t sap_indicate_radar(struct sap_context *sap_ctx)
+static inline uint8_t sap_indicate_radar(struct sap_context *sap_ctx)
 {
 	return 0;
 }
